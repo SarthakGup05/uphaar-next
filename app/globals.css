@@ -6,8 +6,9 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-lato), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-playfair), ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+  
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -47,72 +48,107 @@
 }
 
 :root {
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
+  --radius: 0.5rem;
+
+  /* Background: Warm Stone (#FAFAF9) */
+  --background: oklch(0.982 0.002 88.5);
+  /* Foreground: Soft Charcoal (#2C2C2C) */
+  --foreground: oklch(0.28 0 0);
+
+  /* Card: Pure White for crispness */
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
+  --card-foreground: oklch(0.28 0 0);
+
+  /* Popover: White */
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.28 0 0);
+
+  /* Primary: Sage Green (#5F6F52) */
+  --primary: oklch(0.46 0.09 133);
+  --primary-foreground: oklch(0.982 0.002 88.5);
+
+  /* Secondary: Muted Earth/Terracotta (#A98467) */
+  --secondary: oklch(0.63 0.11 50);
+  --secondary-foreground: oklch(0.982 0.002 88.5);
+
+  /* Muted: Light Warm Grey */
+  --muted: oklch(0.96 0.005 100);
+  --muted-foreground: oklch(0.55 0 0);
+
+  /* Accent: Antique Gold (#D4AF37) - Used for Highlights */
+  --accent: oklch(0.76 0.16 85);
+  --accent-foreground: oklch(0.28 0 0);
+
+  /* Destructive: Error Red */
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
+  --destructive-foreground: oklch(0.982 0.002 88.5);
+
+  /* Borders: Light Stone */
+  --border: oklch(0.92 0.006 100);
+  --input: oklch(0.92 0.006 100);
+  
+  /* Ring: Sage Green (Focus state) */
+  --ring: oklch(0.46 0.09 133);
+
+  /* Charts (Optional) */
+  --chart-1: oklch(0.46 0.09 133);
+  --chart-2: oklch(0.63 0.11 50);
+  --chart-3: oklch(0.76 0.16 85);
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+
+  /* Sidebar: Light Mode */
+  --sidebar: oklch(0.982 0.002 88.5);
+  --sidebar-foreground: oklch(0.28 0 0);
+  --sidebar-primary: oklch(0.46 0.09 133);
+  --sidebar-primary-foreground: oklch(0.982 0.002 88.5);
+  --sidebar-accent: oklch(0.96 0.005 100);
+  --sidebar-accent-foreground: oklch(0.28 0 0);
+  --sidebar-border: oklch(0.92 0.006 100);
+  --sidebar-ring: oklch(0.46 0.09 133);
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
+  /* Dark Mode: Deep Charcoal Background */
+  --background: oklch(0.18 0.01 100);
+  --foreground: oklch(0.982 0.002 88.5);
+
+  /* Dark Card */
+  --card: oklch(0.22 0.01 100);
+  --card-foreground: oklch(0.982 0.002 88.5);
+
+  --popover: oklch(0.22 0.01 100);
+  --popover-foreground: oklch(0.982 0.002 88.5);
+
+  /* Primary: Lighter Sage for contrast against dark bg */
+  --primary: oklch(0.55 0.11 133);
+  --primary-foreground: oklch(0.18 0.01 100);
+
+  /* Secondary: Desaturated Earth */
+  --secondary: oklch(0.63 0.11 50);
+  --secondary-foreground: oklch(0.18 0.01 100);
+
+  --muted: oklch(0.28 0.01 100);
+  --muted-foreground: oklch(0.70 0.01 100);
+
+  /* Accent: Bright Gold */
+  --accent: oklch(0.76 0.16 85);
+  --accent-foreground: oklch(0.18 0.01 100);
+
   --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --border: oklch(0.30 0.01 100);
+  --input: oklch(0.30 0.01 100);
+  --ring: oklch(0.55 0.11 133);
+
+  /* Sidebar: Dark Mode */
+  --sidebar: oklch(0.18 0.01 100);
+  --sidebar-foreground: oklch(0.982 0.002 88.5);
+  --sidebar-primary: oklch(0.55 0.11 133);
+  --sidebar-primary-foreground: oklch(0.982 0.002 88.5);
+  --sidebar-accent: oklch(0.28 0.01 100);
+  --sidebar-accent-foreground: oklch(0.982 0.002 88.5);
+  --sidebar-border: oklch(0.30 0.01 100);
+  --sidebar-ring: oklch(0.55 0.11 133);
 }
 
 @layer base {
@@ -122,4 +158,14 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+/* Hide scrollbar for IE, Edge and Firefox */
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
 }
