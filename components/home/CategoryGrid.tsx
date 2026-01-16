@@ -10,7 +10,7 @@ const categories = [
     id: "resin",
     title: "Resin Art",
     description: "Ocean waves & floral preservation.",
-    href: "/shop/resin",
+    href: "/shop?category=resin", // Updated link
     image: "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&q=80&w=800",
     size: "large", // Takes up 2 rows
   },
@@ -18,7 +18,7 @@ const categories = [
     id: "candles",
     title: "Aromatherapy",
     description: "Hand-poured soy wax.",
-    href: "/shop/candles",
+    href: "/shop?category=candles", // Updated link
     image: "https://images.unsplash.com/photo-1602143407151-11115cd4e69b?auto=format&fit=crop&q=80&w=800",
     size: "small",
   },
@@ -26,7 +26,7 @@ const categories = [
     id: "concrete",
     title: "Concrete Décor",
     description: "Minimalist planters & trays.",
-    href: "/shop/concrete",
+    href: "/shop?category=concrete", // Updated link
     image: "https://images.unsplash.com/photo-1485955900006-10f4d324d411?auto=format&fit=crop&q=80&w=800",
     size: "small",
   },

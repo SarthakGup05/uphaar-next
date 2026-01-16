@@ -12,13 +12,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Badge } from "@/components/ui/badge";
 
-// MOCK DATA - Replace with Prisma fetch later
+// UPDATED MOCK DATA with 'slug'
 const allProducts = [
   {
     id: 1,
     title: "Ocean Blue Resin Tray",
+    slug: "ocean-blue-resin-tray",
     category: "Resin",
     price: 1200,
     image: "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&q=80&w=600",
@@ -26,6 +26,7 @@ const allProducts = [
   {
     id: 2,
     title: "Minimalist Concrete Planter",
+    slug: "minimalist-concrete-planter",
     category: "Concrete",
     price: 450,
     image: "https://images.unsplash.com/photo-1485955900006-10f4d324d411?auto=format&fit=crop&q=80&w=600",
@@ -33,6 +34,7 @@ const allProducts = [
   {
     id: 3,
     title: "Lavender Soy Candle",
+    slug: "lavender-soy-candle",
     category: "Candles",
     price: 850,
     image: "https://images.unsplash.com/photo-1603006905003-be475563bc59?auto=format&fit=crop&q=80&w=600",
@@ -40,6 +42,7 @@ const allProducts = [
   {
     id: 4,
     title: "Gold Flake Coaster Set",
+    slug: "gold-flake-coaster-set",
     category: "Resin",
     price: 600,
     image: "https://images.unsplash.com/photo-1615485925763-867862f80d52?auto=format&fit=crop&q=80&w=600",
@@ -47,6 +50,7 @@ const allProducts = [
   {
     id: 5,
     title: "Geometric Concrete Tray",
+    slug: "geometric-concrete-tray",
     category: "Concrete",
     price: 550,
     image: "https://images.unsplash.com/photo-1516975080664-ed2fc6a32937?auto=format&fit=crop&q=80&w=600",
@@ -54,6 +58,7 @@ const allProducts = [
   {
     id: 6,
     title: "Rose & Sandalwood Candle",
+    slug: "rose-sandalwood-candle",
     category: "Candles",
     price: 900,
     image: "https://images.unsplash.com/photo-1596436081179-8b277b089c25?auto=format&fit=crop&q=80&w=600",
@@ -180,6 +185,7 @@ export default function ShopPage() {
                   category={product.category}
                   price={product.price}
                   image={product.image}
+                  slug={product.slug} // ADDED THIS PROP
                 />
               </motion.div>
             ))}
