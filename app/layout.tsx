@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { Playfair_Display, Lato } from "next/font/google";
 import "./globals.css";
-import Navbar from "@/components/layout/navbar";
-import Footer from "@/components/layout/Footer";
+
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -30,9 +29,7 @@ export default function RootLayout({
       <body
         className={`${playfair.variable} ${lato.variable} bg-background text-text antialiased`}
       >
-        <Navbar />
         {children}
-        <Footer />
       </body>
     </html>
   );
