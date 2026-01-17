@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Leaf, Palette, Heart, Hammer, Award, Users, Gift } from "lucide-react"; // Added Gift icon
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import Link from "next/link";
 
 // Animation variants
 const fadeIn = {
@@ -39,10 +40,10 @@ export default function AboutPage() {
               Est. 2024
             </Badge>
             <h1 className="font-serif text-5xl md:text-8xl font-bold text-foreground mb-6">
-              Uphar <span className="text-3xl md:text-5xl font-normal italic text-secondary">by Niharika</span>
+              Uphaar <span className="text-3xl md:text-5xl font-normal italic text-secondary">by Niharika</span>
             </h1>
             <p className="text-lg md:text-2xl text-muted-foreground leading-relaxed max-w-2xl mx-auto">
-              "Uphar" means <em>Gift</em>. <br/>
+              "Uphaar" means <em>Gift</em>. <br/>
               We believe that art is the most personal gift you can give—to your home, to your loved ones, or to yourself.
             </p>
           </motion.div>
@@ -188,9 +189,11 @@ export default function AboutPage() {
       {/* SECTION 5: CTA */}
       <section className="py-24 text-center">
         <h2 className="font-serif text-3xl md:text-5xl font-bold mb-6">Find the perfect Uphar.</h2>
-        <Button size="lg" className="rounded-full px-8 h-12 text-lg">
+          <Link href="/shop">
+        <Button size="lg" className="cursor-pointer rounded-full px-8 h-12 text-lg">
           Browse Collection
         </Button>
+        </Link>
       </section>
 
     </div>

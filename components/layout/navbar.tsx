@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { Menu, Search, Instagram, Facebook } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { CartSheet } from "@/components/Cartsheet"; 
+import { CartSheet } from "@/components/Cartsheet";
 
 export default function Navbar() {
   // Updated links to query the Shop Page filters directly
@@ -25,14 +26,14 @@ export default function Navbar() {
 
       {/* 2. Main Navigation */}
       <nav className="border-b border-stone-200/50 bg-background/80 backdrop-blur-xl">
-        <div className="container mx-auto flex h-16 items-center justify-between px-4 md:px-6">
-          
+        <div className="container mx-auto flex h-24 items-center justify-between px-4 md:px-6">
+
           {/* Mobile Menu Trigger (Left on Mobile) */}
           <div className="md:hidden">
             <Sheet>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon" className="-ml-2">
-                  <Menu className="h-5 w-5 text-foreground" />
+                  <Menu className="h-6 w-6 text-foreground" />
                 </Button>
               </SheetTrigger>
               <SheetContent side="left" className="w-[300px]">
@@ -53,8 +54,8 @@ export default function Navbar() {
                   </Link>
                   <div className="my-2 border-t border-border" />
                   {navLinks.map((link) => (
-                    <Link 
-                      key={link.name} 
+                    <Link
+                      key={link.name}
                       href={link.href}
                       className="text-lg font-medium text-foreground hover:text-primary transition-colors"
                     >
@@ -62,8 +63,8 @@ export default function Navbar() {
                     </Link>
                   ))}
                   <div className="mt-8 border-t pt-8 flex gap-4">
-                     <Instagram className="w-5 h-5 text-foreground" />
-                     <Facebook className="w-5 h-5 text-foreground" />
+                    <Instagram className="w-5 h-5 text-foreground" />
+                    <Facebook className="w-5 h-5 text-foreground" />
                   </div>
                 </div>
               </SheetContent>
@@ -72,30 +73,33 @@ export default function Navbar() {
 
           {/* Logo (Centered on Mobile, Left on Desktop) */}
           <div className="flex-1 md:flex-none text-center md:text-left">
-            <Link href="/" className="flex flex-col items-center md:items-start leading-none group">
-              <span className="font-serif text-2xl font-bold tracking-tight text-primary transition-colors group-hover:opacity-80">
-                Uphar
-              </span>
-              <span className="font-serif text-[10px] italic tracking-widest text-secondary -mt-1">
-                by Niharika
-              </span>
+            <Link href="/" className="flex flex-col items-center md:items-start group">
+              <div className="relative h-20 w-48 md:h-24 md:w-64 transition-opacity group-hover:opacity-90">
+                <Image
+                  src="/logo.png"
+                  alt="Uphar by Niharika"
+                  fill
+                  className="object-contain object-center md:object-left"
+                  priority
+                />
+              </div>
             </Link>
           </div>
 
           {/* Desktop Links (Centered) */}
           <div className="hidden flex-1 justify-center gap-8 md:flex">
-             <Link
-                href="/"
-                className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary hover:underline underline-offset-4 decoration-secondary"
-              >
-                Home
-              </Link>
-              <Link
-                href="/about"
-                className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary hover:underline underline-offset-4 decoration-secondary"
-              >
-                About
-              </Link>
+            <Link
+              href="/"
+              className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary hover:underline underline-offset-4 decoration-secondary"
+            >
+              Home
+            </Link>
+            <Link
+              href="/about"
+              className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary hover:underline underline-offset-4 decoration-secondary"
+            >
+              About
+            </Link>
             {navLinks.map((link) => (
               <Link
                 key={link.name}
@@ -109,10 +113,10 @@ export default function Navbar() {
 
           {/* Right Actions */}
           <div className="flex items-center gap-1 md:gap-2">
-            <Button variant="ghost" size="icon" className="hidden sm:flex hover:text-primary">
+            {/* <Button variant="ghost" size="icon" className="hidden sm:flex hover:text-primary">
               <Search className="h-5 w-5" />
-            </Button>
-            
+            </Button> */}
+
             {/* Cart Sheet Component */}
             <CartSheet />
           </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { ShoppingBag, Trash2, X } from "lucide-react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
@@ -10,24 +11,38 @@ import { useCartStore } from "@/lib/store/cart-store"; // Import the store
 
 export function CartSheet() {
   // Access state and actions from the store
-  const { items, removeItem, total } = useCartStore();
-  
-  const cartTotal = total(); // Calculate total price
+  const { items, removeItem, total, totalItems } = useCartStore();
+
+  // Hydration fix for persistent store
+  const [isMounted, setIsMounted] = useState(false);
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) {
+    return (
+      <Button variant="ghost" size="icon" className="relative hover:text-primary">
+        <ShoppingBag className="h-5 w-5" />
+      </Button>
+    )
+  }
+
+  const cartTotal = total();
+  const itemCount = totalItems();
 
   const handleWhatsAppCheckout = () => {
     if (items.length === 0) return;
 
-    const phoneNumber = "919876543210"; // REPLACE with actual number
+    const phoneNumber = "917000769656";
     let message = "Hello! I would like to order:\n\n";
-    
+
     items.forEach(item => {
-      // Create a nice list: "2x Ocean Tray - ₹2400"
       message += `▪️ ${item.quantity}x ${item.title} - ₹${item.price * item.quantity}\n`;
     });
-    
+
     message += `\n*Total Estimate: ₹${cartTotal.toLocaleString()}*`;
     message += `\n\nPlease confirm availability and shipping details.`;
-    
+
     window.open(`https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`, "_blank");
   };
 
@@ -36,19 +51,19 @@ export function CartSheet() {
       <SheetTrigger asChild>
         <Button variant="ghost" size="icon" className="relative hover:text-primary">
           <ShoppingBag className="h-5 w-5" />
-          {items.length > 0 && (
+          {itemCount > 0 && (
             <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] text-white animate-in zoom-in">
-              {items.length}
+              {itemCount}
             </span>
           )}
         </Button>
       </SheetTrigger>
-      
+
       <SheetContent className="flex w-full flex-col pr-0 sm:max-w-md">
         <SheetHeader className="px-1">
           <SheetTitle className="font-serif text-2xl text-primary">Your Cart</SheetTitle>
         </SheetHeader>
-        
+
         <Separator className="my-4" />
 
         {items.length === 0 ? (
@@ -67,14 +82,14 @@ export function CartSheet() {
                   <div key={item.id} className="flex gap-4 group">
                     {/* Product Image */}
                     <div className="relative h-20 w-20 overflow-hidden rounded-md border border-stone-100 bg-stone-50">
-                      <Image 
-                        src={item.image} 
-                        alt={item.title} 
-                        fill 
-                        className="object-cover" 
+                      <Image
+                        src={item.image}
+                        alt={item.title}
+                        fill
+                        className="object-cover"
                       />
                     </div>
-                    
+
                     {/* Details */}
                     <div className="flex flex-1 flex-col justify-between py-1">
                       <div>
@@ -83,15 +98,15 @@ export function CartSheet() {
                           ₹{item.price.toLocaleString()} x {item.quantity}
                         </p>
                       </div>
-                      
+
                       <div className="flex items-center justify-between">
                         <span className="text-sm font-semibold text-primary">
                           ₹{(item.price * item.quantity).toLocaleString()}
                         </span>
-                        
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
+
+                        <Button
+                          variant="ghost"
+                          size="icon"
                           className="h-6 w-6 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
                           onClick={() => removeItem(item.id)}
                         >
@@ -113,8 +128,8 @@ export function CartSheet() {
                   ₹{cartTotal.toLocaleString()}
                 </span>
               </div>
-              <Button 
-                onClick={handleWhatsAppCheckout} 
+              <Button
+                onClick={handleWhatsAppCheckout}
                 className="w-full bg-[#25D366] hover:bg-[#128C7E] text-white font-bold h-12 text-base shadow-lg shadow-green-500/20"
               >
                 Order via WhatsApp

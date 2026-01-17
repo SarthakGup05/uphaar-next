@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Mail, Phone, MapPin, Instagram, Send } from "lucide-react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -23,12 +24,12 @@ const itemVariants = {
 export default function ContactPage() {
   const handleWhatsAppClick = () => {
     // Replace with actual number
-    window.open("https://wa.me/919876543210", "_blank");
+    window.open("https://wa.me/917000769656", "_blank");
   };
 
   return (
     <div className="min-h-screen bg-background">
-      
+
       {/* 1. HERO SECTION */}
       <section className="relative w-full bg-primary/5 py-20 text-center md:py-32">
         <div className="container px-4">
@@ -42,7 +43,7 @@ export default function ContactPage() {
               Get in <span className="text-primary italic">Touch</span>
             </h1>
             <p className="text-lg text-muted-foreground">
-              Have a custom design in mind? Looking for bulk gifting options? 
+              Have a custom design in mind? Looking for bulk gifting options?
               Or just want to say hi? We’d love to hear from you.
             </p>
           </motion.div>
@@ -53,14 +54,14 @@ export default function ContactPage() {
 
       {/* 2. MAIN CONTENT SPLIT */}
       <div className="container mx-auto px-4 py-16 md:py-24">
-        <motion.div 
+        <motion.div
           variants={containerVariants}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
           className="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:gap-20"
         >
-          
+
           {/* LEFT: Contact Form */}
           <motion.div variants={itemVariants} className="space-y-8">
             <div className="space-y-2">
@@ -81,7 +82,7 @@ export default function ContactPage() {
                   <Input id="email" type="email" placeholder="hello@example.com" className="bg-stone-50" />
                 </div>
               </div>
-              
+
               <div className="space-y-2">
                 <label htmlFor="subject" className="text-sm font-medium">Subject</label>
                 <Input id="subject" placeholder="Custom Order / Inquiry" className="bg-stone-50" />
@@ -89,10 +90,10 @@ export default function ContactPage() {
 
               <div className="space-y-2">
                 <label htmlFor="message" className="text-sm font-medium">Message</label>
-                <Textarea 
-                  id="message" 
-                  placeholder="Tell us what you have in mind..." 
-                  className="min-h-[150px] bg-stone-50" 
+                <Textarea
+                  id="message"
+                  placeholder="Tell us what you have in mind..."
+                  className="min-h-[150px] bg-stone-50"
                 />
               </div>
 
@@ -104,7 +105,7 @@ export default function ContactPage() {
 
           {/* RIGHT: Contact Info & Direct Links */}
           <motion.div variants={itemVariants} className="flex flex-col gap-8 lg:pl-10">
-            
+
             {/* Info Cards */}
             <div className="grid gap-6">
               <div className="flex items-start gap-4 rounded-xl border border-border p-6 shadow-sm transition-colors hover:border-primary/50 hover:bg-primary/5">
@@ -114,12 +115,12 @@ export default function ContactPage() {
                 <div>
                   <h3 className="font-semibold">Chat on WhatsApp</h3>
                   <p className="mb-3 text-sm text-muted-foreground">The fastest way to reach us for orders.</p>
-                  <Button 
-                    variant="link" 
+                  <Button
+                    variant="link"
                     className="h-auto p-0 text-primary underline decoration-primary/30 underline-offset-4 hover:decoration-primary"
                     onClick={handleWhatsAppClick}
                   >
-                    +91 98765 43210
+                    +91 70007 69656
                   </Button>
                 </div>
               </div>
@@ -131,8 +132,8 @@ export default function ContactPage() {
                 <div>
                   <h3 className="font-semibold">Email Us</h3>
                   <p className="mb-3 text-sm text-muted-foreground">For collaborations and bulk inquiries.</p>
-                  <a href="mailto:hello@uphar.com" className="text-sm hover:text-primary">
-                    hello@uphar.com
+                  <a href="mailto:Uphaarbyniharika@gmail.com" className="text-sm hover:text-primary">
+                    Uphaarbyniharika@gmail.com
                   </a>
                 </div>
               </div>
@@ -157,13 +158,19 @@ export default function ContactPage() {
               <p className="mt-2 text-white/70">
                 See behind-the-scenes of how we pour our candles and resin art.
               </p>
-              <Button 
-                variant="outline" 
-                className="mt-6 gap-2 border-white/20 bg-white/10 text-white hover:bg-white hover:text-black"
+              <a
+                href="https://www.instagram.com/uphaar_token_of_love/?igsh=Mm9leXRoY3hvaDJl#"
+                target="_blank"
+                rel="noopener noreferrer"
               >
-                <Instagram className="h-4 w-4" />
-                @uphar_by_niharika
-              </Button>
+                <Button
+                  variant="outline"
+                  className="mt-6 gap-2 border-white/20 bg-white/10 text-white hover:bg-white hover:text-black"
+                >
+                  <Instagram className="h-4 w-4" />
+                  @uphar_by_niharika
+                </Button>
+              </a>
             </div>
 
           </motion.div>
@@ -177,9 +184,11 @@ export default function ContactPage() {
           <p className="mx-auto mb-8 max-w-lg text-muted-foreground">
             Wondering about shipping times or resin care instructions? We might have already answered your question.
           </p>
-          <Button variant="outline" className="gap-2">
-            Visit FAQ Page <Send className="h-4 w-4" />
-          </Button>
+          <Link href="/faq">
+            <Button variant="outline" className="gap-2">
+              Visit FAQ Page <Send className="h-4 w-4" />
+            </Button>
+          </Link>
         </div>
       </section>
 

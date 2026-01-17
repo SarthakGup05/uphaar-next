@@ -10,14 +10,14 @@ async function main() {
   const { db } = await import("@/lib/db");
 
   // 1. Define your admin credentials
-  const password = await hash("Niharika@123", 12); // Change "admin123" to your desired password
+  const hashedPassword = await hash("Niharika@123", 12); // Change "admin123" to your desired password
 
   // 2. Insert into the DB
   try {
     await db.insert(users).values({
       name: "Niharika",
-      email: "uphaarbyniharika@gmail.com", // Your email
-      password: password,
+      email: "Uphaarbyniharika@gmail.com", // Your email
+      password: hashedPassword,
       role: "admin",
     });
     console.log("✅ Admin user created successfully!");

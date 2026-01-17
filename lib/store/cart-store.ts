@@ -18,6 +18,7 @@ interface CartStore {
   updateQuantity: (id: string, delta: 1 | -1) => void;
   clearCart: () => void;
   total: () => number;
+  totalItems: () => number;
 }
 
 export const useCartStore = create<CartStore>()(
@@ -56,6 +57,8 @@ export const useCartStore = create<CartStore>()(
       clearCart: () => set({ items: [] }),
 
       total: () => get().items.reduce((acc, item) => acc + item.price * item.quantity, 0),
+      
+      totalItems: () => get().items.reduce((acc, item) => acc + item.quantity, 0),
     }),
     { name: 'uphar-cart' } // Persist cart to localStorage so it survives refresh
   )
