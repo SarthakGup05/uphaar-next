@@ -1,64 +1,106 @@
+
 "use client";
 
 import { useHeroStore } from "@/lib/store/hero-store";
 import { Button } from "@/components/ui/button";
-import {
-    Label
-} from "@/components/ui/label";
+import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, use } from "react";
 import { Loader2 } from "lucide-react";
 import { ImageUpload } from "@/components/admin/image-upload";
 import { toast } from "sonner";
-import { Switch } from "@/components/ui/switch"; // Assuming Switch component exists or I'll use a checkbox
+import { Switch } from "@/components/ui/switch";
+import { useQuery } from "@tanstack/react-query";
 
-export default function NewSlidePage() {
+interface PageProps {
+    params: Promise<{ id: string }>;
+}
+
+export default function EditHeroPage({ params }: PageProps) {
+    const { id } = use(params);
     const router = useRouter();
-    const { formData, isLoading, isUploading, setField, setLoading, resetForm } = useHeroStore();
+    const { formData, isLoading, isUploading, setField, setFormData, setLoading, resetForm } = useHeroStore();
+
+    // Fetch slide data
+    const { data: slide, isLoading: isFetching } = useQuery({
+        queryKey: ["hero-slide", id],
+        queryFn: async () => {
+            const res = await fetch(`/api/hero/${id}`);
+            if (!res.ok) throw new Error("Failed to fetch slide");
+            return res.json();
+        },
+    });
+
+    // Populate store
+    useEffect(() => {
+        if (slide) {
+            setFormData({
+                title: slide.title,
+                subtitle: slide.subtitle || "",
+                image: slide.image,
+                cta: slide.cta || "Shop Now",
+                align: slide.align || "center",
+                order: slide.order || 0,
+                isActive: slide.isActive,
+            });
+        }
+    }, [slide, setFormData]);
 
     useEffect(() => {
-        resetForm();
+        return () => resetForm();
     }, [resetForm]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
         if (!formData.title || !formData.image || !formData.cta) {
-            toast.error("Please fill in all required fields and upload an image.");
+            toast.error("Please fill in all required fields.");
             return;
         }
 
         setLoading(true);
         try {
-            const response = await fetch("/api/hero", {
-                method: "POST",
+            const response = await fetch(`/api/hero/${id}`, {
+                method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(formData),
             });
 
             if (!response.ok) {
-                throw new Error("Failed to create slide");
+                throw new Error("Failed to update slide");
             }
 
-            toast.success("Slide created successfully");
+            toast.success("Slide updated successfully");
             router.refresh();
             router.push("/admin/hero");
         } catch (error) {
             console.error(error);
-            toast.error("Failed to create slide");
+            toast.error("Failed to update slide");
         } finally {
             setLoading(false);
         }
     };
 
+    if (isFetching) {
+        return (
+            <div className="flex items-center justify-center min-h-[400px]">
+                <Loader2 className="h-8 w-8 animate-spin" />
+            </div>
+        );
+    }
+
+    if (!slide && !isFetching) {
+        return <div>Slide not found</div>;
+    }
+
     return (
         <div className="max-w-2xl mx-auto space-y-6 p-6">
             <div>
-                <h1 className="text-2xl font-bold font-serif">Add New Slide</h1>
-                <p className="text-muted-foreground">Create a new slide for the homepage hero section.</p>
+                <h1 className="text-2xl font-bold font-serif">Edit Slide</h1>
+                <p className="text-muted-foreground">Update hero slide details.</p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -128,11 +170,6 @@ export default function NewSlidePage() {
                             Show this slide on the homepage
                         </p>
                     </div>
-                    {/* Using simple checkbox if Switch is not available, but user likely has Shadcn Switch.
-                        Based on package.json, @radix-ui/react-switch is installed.
-                        I'll try to import Switch from components/ui/switch.
-                        If it fails, I'll fallback to input type checkbox.
-                     */}
                     <Switch
                         checked={formData.isActive}
                         onCheckedChange={(checked) => setField("isActive", checked)}
@@ -155,7 +192,7 @@ export default function NewSlidePage() {
                     </Button>
                     <Button type="submit" disabled={isLoading || isUploading}>
                         {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        Create Slide
+                        Update Slide
                     </Button>
                 </div>
             </form>

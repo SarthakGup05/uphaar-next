@@ -41,7 +41,19 @@ export default function AdminOrdersPage() {
                     <p className="text-muted-foreground">Track WhatsApp orders and payments manually.</p>
                 </div>
                 <div className="flex gap-2">
-                    <Button variant="outline" className="gap-2">
+                    <Button variant="outline" className="gap-2" onClick={() => {
+                        if (!data) return;
+                        const csvContent = "data:text/csv;charset=utf-8,"
+                            + "ID,Customer,Date,Status,Total\n"
+                            + data.map(o => `${o.id},"${o.customer}",${o.date},${o.status},${o.total}`).join("\n");
+                        const encodedUri = encodeURI(csvContent);
+                        const link = document.createElement("a");
+                        link.setAttribute("href", encodedUri);
+                        link.setAttribute("download", "orders.csv");
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                    }}>
                         <Download className="h-4 w-4" /> Export CSV
                     </Button>
                     {/* Opens a manual entry form (Future Feature) */}

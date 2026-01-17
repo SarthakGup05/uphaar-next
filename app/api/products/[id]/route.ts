@@ -5,6 +5,30 @@ import { products } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { getSession } from "@/lib/auth";
 
+// GET: Fetch a single product
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id: paramId } = await params;
+    const id = parseInt(paramId);
+
+    const [product] = await db
+      .select()
+      .from(products)
+      .where(eq(products.id, id));
+
+    if (!product) {
+      return NextResponse.json({ error: "Product not found" }, { status: 404 });
+    }
+
+    return NextResponse.json(product);
+  } catch (error) {
+    return NextResponse.json({ error: "Failed to fetch product" }, { status: 500 });
+  }
+}
+
 // DELETE: Remove a product (Admin Only)
 export async function DELETE(
   request: Request,

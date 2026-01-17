@@ -48,6 +48,7 @@ export async function POST(request: Request) {
       stock: Number(body.stock),
       category: body.category,
       image: body.image,
+      heroImage: body.heroImage,
     }).returning();
 
     return NextResponse.json(newProduct, { status: 201 });

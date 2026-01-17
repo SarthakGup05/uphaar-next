@@ -13,6 +13,7 @@ export const products = pgTable("products", {
   price: numeric("price", { precision: 10, scale: 2 }).notNull(),
   stock: integer("stock").notNull().default(0),
   image: text("image").notNull(),
+  heroImage: text("hero_image"), // Optional hero/banner image
   createdAt: timestamp("created_at").defaultNow(),
 });
 

@@ -1,18 +1,10 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
+import { useProductStore } from "@/lib/store/product-store"; // Import Zustand store
 import { Button } from "@/components/ui/button";
 import {
-    Form,
-    FormControl,
-    FormDescription,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-} from "@/components/ui/form";
+    Label
+} from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -22,72 +14,59 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { ArrowLeft, Loader2, UploadCloud } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
 import { useRouter } from "next/navigation";
-
-// 1. Define the Validation Schema
-const formSchema = z.object({
-    title: z.string().min(2, {
-        message: "Title must be at least 2 characters.",
-    }),
-    slug: z.string().min(2, {
-        message: "Slug is required for the URL.",
-    }).regex(/^[a-z0-9-]+$/, {
-        message: "Slug must contain only lowercase letters, numbers, and dashes.",
-    }),
-    description: z.string().min(10, {
-        message: "Description must be at least 10 characters.",
-    }),
-    // z.coerce handles string "100" -> number 100 conversion automatically
-    price: z.coerce.number().min(1, {
-        message: "Price must be greater than 0.",
-    }),
-    stock: z.coerce.number().min(0, {
-        message: "Stock cannot be negative.",
-    }),
-    // Fixed: using .min(1) instead of required_error to prevent type conflicts
-    category: z.string().min(1, {
-        message: "Please select a category.",
-    }),
-    imageUrl: z.string().optional(),
-});
-
-// Infer the type for use in onSubmit
-type ProductFormValues = z.infer<typeof formSchema>;
+import { ImageUpload } from "@/components/admin/image-upload"; // Import new component
+import { useEffect } from "react";
+import { toast } from "sonner"; // Assuming sonner is installed/used for toasts
 
 export default function AddProductPage() {
     const router = useRouter();
-    const [isSubmitting, setIsSubmitting] = useState(false);
+    // Destructure store state and actions
+    const { formData, isLoading, isUploading, setField, setLoading, resetForm } = useProductStore();
 
-    // 2. Define the Form
-    // FIX: Removed <z.infer<typeof formSchema>> generic to allow resolver to handle type inference
-    const form = useForm({
-        resolver: zodResolver(formSchema),
-        defaultValues: {
-            title: "",
-            slug: "",
-            description: "",
-            price: 0,
-            stock: 0,
-            category: "", // Default empty string for Select
-        },
-    });
+    // Reset form on mount
+    useEffect(() => {
+        resetForm();
+    }, [resetForm]);
 
-    // 3. Handle Submission
-    function onSubmit(values: ProductFormValues) {
-        setIsSubmitting(true);
+    // Handle Submission
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
 
-        // Simulate API Call
-        console.log("Submitting:", values);
+        // Basic Validation
+        if (!formData.title || !formData.slug || !formData.imageUrl) {
+            toast.error("Please fill in all required fields and upload an image.");
+            return;
+        }
 
-        setTimeout(() => {
-            setIsSubmitting(false);
-            alert("Product Created Successfully!");
+        setLoading(true);
+
+        try {
+            const response = await fetch("/api/products", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    ...formData,
+                    image: formData.imageUrl, // Map imageUrl to image for DB
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to create product");
+            }
+
+            toast.success("Product created successfully!");
             router.push("/admin/products");
-        }, 1000);
-    }
+            router.refresh(); // Refresh Next.js cache
+        } catch (error) {
+            console.error(error);
+            toast.error("Something went wrong.");
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
         <div className="max-w-4xl mx-auto pb-20">
@@ -102,160 +81,157 @@ export default function AddProductPage() {
                 <h1 className="font-serif text-2xl font-bold">Add New Product</h1>
             </div>
 
-            <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <form onSubmit={handleSubmit} className="space-y-8">
 
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-                        {/* LEFT COLUMN: Main Info */}
-                        <div className="lg:col-span-2 space-y-8">
-                            {/* Basic Details Card */}
-                            <div className="rounded-xl border border-stone-200 bg-white p-6 space-y-6">
-                                <div className="space-y-1">
-                                    <h2 className="font-semibold text-lg">Product Details</h2>
-                                    <p className="text-sm text-muted-foreground">Title, description and URL settings.</p>
-                                </div>
+                    {/* LEFT COLUMN: Main Info */}
+                    <div className="lg:col-span-2 space-y-8">
+                        {/* Basic Details Card */}
+                        <div className="rounded-xl border border-stone-200 bg-white p-6 space-y-6">
+                            <div className="space-y-1">
+                                <h2 className="font-semibold text-lg">Product Details</h2>
+                                <p className="text-sm text-muted-foreground">Title, description and URL settings.</p>
+                            </div>
 
-                                <FormField
-                                    control={form.control}
-                                    name="title"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Product Title</FormLabel>
-                                            <FormControl>
-                                                <Input placeholder="e.g. Ocean Blue Resin Tray" {...field} />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-
-                                <FormField
-                                    control={form.control}
-                                    name="slug"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Slug</FormLabel>
-                                            <FormControl>
-                                                <Input placeholder="ocean-blue-resin-tray" {...field} />
-                                            </FormControl>
-                                            <FormDescription>
-                                                The URL-friendly version of the name.
-                                            </FormDescription>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-
-                                <FormField
-                                    control={form.control}
-                                    name="description"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Description</FormLabel>
-                                            <FormControl>
-                                                <Textarea
-                                                    placeholder="Describe the product details, materials used, etc."
-                                                    className="min-h-[150px]"
-                                                    {...field}
-                                                />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
+                            <div className="space-y-2">
+                                <Label>Product Title</Label>
+                                <Input
+                                    placeholder="e.g. Ocean Blue Resin Tray"
+                                    value={formData.title}
+                                    onChange={(e) => setField('title', e.target.value)}
+                                    required
                                 />
                             </div>
 
-                            {/* Media Card */}
-                            <div className="rounded-xl border border-stone-200 bg-white p-6 space-y-6">
-                                <h2 className="font-semibold text-lg">Product Images</h2>
-                                <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-stone-200 bg-stone-50 py-12 hover:bg-stone-100 transition-colors cursor-pointer">
-                                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-sm mb-4">
-                                        <UploadCloud className="h-6 w-6 text-primary" />
-                                    </div>
-                                    <div className="text-center">
-                                        <p className="font-medium text-sm">Click to upload image</p>
-                                        <p className="mt-1 text-xs text-muted-foreground">SVG, PNG, JPG (max 800x800px)</p>
-                                    </div>
-                                </div>
+                            <div className="space-y-2">
+                                <Label>Slug</Label>
+                                <Input
+                                    placeholder="ocean-blue-resin-tray"
+                                    value={formData.slug}
+                                    onChange={(e) => setField('slug', e.target.value)}
+                                    required
+                                />
+                                <p className="text-[0.8rem] text-muted-foreground">
+                                    The URL-friendly version of the name.
+                                </p>
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label>Description</Label>
+                                <Textarea
+                                    placeholder="Describe the product details, materials used, etc."
+                                    className="min-h-[150px]"
+                                    value={formData.description}
+                                    onChange={(e) => setField('description', e.target.value)}
+                                    required
+                                />
                             </div>
                         </div>
 
-                        {/* RIGHT COLUMN: Settings */}
-                        <div className="space-y-8">
-                            <div className="rounded-xl border border-stone-200 bg-white p-6 space-y-6">
-                                <h2 className="font-semibold text-lg">Status & Inventory</h2>
+                        {/* Media Card */}
+                        <div className="rounded-xl border border-stone-200 bg-white p-6 space-y-6">
+                            <h2 className="font-semibold text-lg">Product Images</h2>
 
-                                <FormField
-                                    control={form.control}
-                                    name="category"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Category</FormLabel>
-                                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                <FormControl>
-                                                    <SelectTrigger>
-                                                        <SelectValue placeholder="Select category" />
-                                                    </SelectTrigger>
-                                                </FormControl>
-                                                <SelectContent>
-                                                    <SelectItem value="Resin">Resin Art</SelectItem>
-                                                    <SelectItem value="Candles">Candles</SelectItem>
-                                                    <SelectItem value="Concrete">Concrete</SelectItem>
-                                                    <SelectItem value="Gifts">Gift Hampers</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-
-                                <div className="grid grid-cols-2 gap-4">
-                                    <FormField
-                                        control={form.control}
-                                        name="price"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Price (₹)</FormLabel>
-                                                <FormControl>
-                                                    <Input type="number" {...field} value={field.value as number} />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="space-y-2">
+                                    <Label>Main Image *</Label>
+                                    <ImageUpload
+                                        value={formData.imageUrl}
+                                        onChange={(url) => setField("imageUrl", url)} // Mapped to 'image' in DB eventually
+                                        folder="/products/main"
                                     />
+                                    {/* Sync to 'image' field expected by DB schema */}
+                                    {/* Actually schema expects 'image'. Store has 'imageUrl'. 
+                                        We need to make sure we send 'image': formData.imageUrl 
+                                        Need to fix store to match schema or map it in submit. 
+                                        Let's update store to match schema 'image' or map it. 
+                                        Plan: Store uses 'imageUrl', submit maps to 'image'. 
+                                        Wait, checking previous step... Schema has 'image'. API expects 'image'.
+                                        Store has 'imageUrl'. 
+                                        I will map in submit, but wait... 
+                                        The previous API edit expected body.image. 
+                                        I am sending JSON.stringify(formData). 
+                                        So formData MUST have 'image' property OR I construct body manually.
+                                        I will update setField calls to map correctly? 
+                                        Actually, better to rename store key to 'image' to match schema? 
+                                        Too late for store file, I'll just map in `handleSubmit` or use `setField('image'...)` if I change the mapped key. 
+                                        Let's assume I fix the mapping in handleSubmit.
+                                     */}
+                                </div>
 
-                                    <FormField
-                                        control={form.control}
-                                        name="stock"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Stock</FormLabel>
-                                                <FormControl>
-                                                    <Input type="number" {...field} value={field.value as number} />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
+                                <div className="space-y-2">
+                                    <Label>Hero/Banner Image (Optional)</Label>
+                                    <ImageUpload
+                                        value={formData.heroImageUrl}
+                                        onChange={(url) => setField("heroImageUrl", url)}
+                                        folder="/products/hero"
                                     />
                                 </div>
-                            </div>
-
-                            {/* Sticky Actions on Mobile, static on Desktop */}
-                            <div className="flex flex-col gap-3">
-                                <Button type="submit" size="lg" disabled={isSubmitting} className="w-full">
-                                    {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                    {isSubmitting ? "Saving..." : "Create Product"}
-                                </Button>
-                                <Link href="/admin/products" className="w-full">
-                                    <Button variant="outline" type="button" className="w-full">Discard</Button>
-                                </Link>
                             </div>
                         </div>
                     </div>
 
-                </form>
-            </Form>
+                    {/* RIGHT COLUMN: Settings */}
+                    <div className="space-y-8">
+                        <div className="rounded-xl border border-stone-200 bg-white p-6 space-y-6">
+                            <h2 className="font-semibold text-lg">Status & Inventory</h2>
+
+                            <div className="space-y-2">
+                                <Label>Category</Label>
+                                <Select
+                                    value={formData.category}
+                                    onValueChange={(val) => setField('category', val)}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select category" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="Resin">Resin Art</SelectItem>
+                                        <SelectItem value="Candles">Candles</SelectItem>
+                                        <SelectItem value="Concrete">Concrete</SelectItem>
+                                        <SelectItem value="Gifts">Gift Hampers</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label>Price (₹)</Label>
+                                    <Input
+                                        type="number"
+                                        value={formData.price}
+                                        onChange={(e) => setField('price', Number(e.target.value))}
+                                        required
+                                    />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label>Stock</Label>
+                                    <Input
+                                        type="number"
+                                        value={formData.stock}
+                                        onChange={(e) => setField('stock', Number(e.target.value))}
+                                        required
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Sticky Actions */}
+                        <div className="flex flex-col gap-3">
+                            <Button type="submit" size="lg" disabled={isLoading || isUploading} className="w-full">
+                                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                {isLoading ? "Saving..." : "Create Product"}
+                            </Button>
+                            <Link href="/admin/products" className="w-full">
+                                <Button variant="outline" type="button" className="w-full">Discard</Button>
+                            </Link>
+                        </div>
+                    </div>
+                </div>
+
+            </form>
         </div>
     );
 }

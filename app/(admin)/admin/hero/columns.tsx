@@ -111,9 +111,11 @@ export const columns: ColumnDef<HeroSlide>[] = [
                             Copy title
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <Link href={`/admin/hero/${slide.id}`}>
-                            <DropdownMenuItem>Edit Slide</DropdownMenuItem>
-                        </Link>
+                        <DropdownMenuItem asChild>
+                            <Link href={`/admin/hero/${slide.id}`} className="w-full cursor-pointer">
+                                Edit Slide
+                            </Link>
+                        </DropdownMenuItem>
                         <DropdownMenuItem onClick={deleteSlide} className="text-red-600 focus:text-red-600">
                             Delete Slide
                         </DropdownMenuItem>

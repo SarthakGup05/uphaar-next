@@ -5,6 +5,32 @@ import { eq } from "drizzle-orm";
 import { getSession } from "@/lib/auth";
 
 /**
+ * GET /api/hero/[id]
+ * Public/Admin: Fetch a single slide by ID.
+ */
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+    const [slide] = await db
+      .select()
+      .from(heroSlides)
+      .where(eq(heroSlides.id, Number(id)));
+
+    if (!slide) {
+      return NextResponse.json({ error: "Slide not found" }, { status: 404 });
+    }
+
+    return NextResponse.json(slide);
+  } catch (error) {
+    console.error("Fetch Slide Error:", error);
+    return NextResponse.json({ error: "Failed to fetch slide" }, { status: 500 });
+  }
+}
+
+/**
  * PUT /api/hero/[id]
  * Admin: Update an existing slide.
  */

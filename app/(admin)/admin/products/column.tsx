@@ -12,6 +12,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import Image from "next/image";
+import Link from "next/link";
+import api from "@/lib/axios";
 
 // The shape of our data
 export type Product = {
@@ -30,11 +32,11 @@ export const columns: ColumnDef<Product>[] = [
     header: "Image",
     cell: ({ row }) => (
       <div className="relative h-10 w-10 overflow-hidden rounded-md border border-stone-200">
-        <Image 
-            src={row.getValue("image")} 
-            alt={row.getValue("title")} 
-            fill 
-            className="object-cover" 
+        <Image
+          src={row.getValue("image")}
+          alt={row.getValue("title")}
+          fill
+          className="object-cover"
         />
       </div>
     ),
@@ -67,7 +69,7 @@ export const columns: ColumnDef<Product>[] = [
         style: "currency",
         currency: "INR",
       }).format(price);
- 
+
       return <div className="text-right font-medium">{formatted}</div>;
     },
   },
@@ -75,19 +77,30 @@ export const columns: ColumnDef<Product>[] = [
     accessorKey: "stock",
     header: "Stock",
     cell: ({ row }) => {
-        const stock = row.getValue("stock") as number;
-        return (
-            <div className={stock < 10 ? "text-red-600 font-medium" : "text-green-600"}>
-                {stock} units
-            </div>
-        )
+      const stock = row.getValue("stock") as number;
+      return (
+        <div className={stock < 10 ? "text-red-600 font-medium" : "text-green-600"}>
+          {stock} units
+        </div>
+      )
     }
   },
   {
     id: "actions",
     cell: ({ row }) => {
       const product = row.original;
- 
+
+      const deleteProduct = async () => {
+        if (!confirm("Are you sure you want to delete this product?")) return;
+        try {
+          await api.delete(`/products/${product.id}`);
+          window.location.reload();
+        } catch (e) {
+          alert("Failed to delete product");
+          console.error(e);
+        }
+      };
+
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -101,11 +114,13 @@ export const columns: ColumnDef<Product>[] = [
             <DropdownMenuItem onClick={() => navigator.clipboard.writeText(product.id)}>
               Copy ID
             </DropdownMenuItem>
-            <DropdownMenuItem className="text-blue-600">
+            <DropdownMenuItem asChild>
+              <Link href={`/admin/products/${product.id}`} className="w-full cursor-pointer text-blue-600">
                 <Pencil className="mr-2 h-4 w-4" /> Edit
+              </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem className="text-red-600">
-                <Trash2 className="mr-2 h-4 w-4" /> Delete
+            <DropdownMenuItem onClick={deleteProduct} className="text-red-600 focus:text-red-600 cursor-pointer">
+              <Trash2 className="mr-2 h-4 w-4" /> Delete
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
