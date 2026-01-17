@@ -3,6 +3,7 @@
 import * as React from "react";
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence, Variants } from "framer-motion";
+import Link from "next/link";
 import { ArrowRight, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
@@ -166,8 +167,10 @@ export default function Hero() {
                   {currentSlide.subtitle}
                 </motion.p>
                 <motion.div variants={textVariants}>
-                  <Button size="lg" className="rounded-full bg-white text-black hover:bg-white/90">
-                    {currentSlide.cta}
+                  <Button asChild size="lg" className="rounded-full bg-white text-black hover:bg-white/90">
+                    <Link href="/shop">
+                      {currentSlide.cta}
+                    </Link>
                   </Button>
                 </motion.div>
               </motion.div>

@@ -3,6 +3,7 @@ import { Playfair_Display, Lato } from "next/font/google";
 import "./globals.css";
 import Providers from "@/components/provider";
 import { Toaster } from "@/components/ui/sonner";
+import { Toaster as HotToaster } from "react-hot-toast";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -28,10 +29,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${playfair.variable} ${lato.variable} bg-background text-text antialiased`}
+        className={`${playfair.variable} ${lato.variable} bg-background text-text antialiased overflow-x-hidden`}
       >
         <Providers>{children}</Providers>
         <Toaster />
+        <HotToaster position="top-center" />
       </body>
     </html>
   );

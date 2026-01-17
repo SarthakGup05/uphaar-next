@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { notFound } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Minus, Plus, ShoppingBag, Truck, ShieldCheck, Star, Share2, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -17,79 +16,32 @@ import {
 import { useCartStore } from "@/lib/store/cart-store";
 // import { toast } from "sonner"; // Optional: For nice notifications
 
-// --- MOCK DATA (Ideally fetch from DB) ---
-const allProducts = [
-    {
-        id: "1",
-        title: "Ocean Blue Resin Tray",
-        slug: "ocean-blue-resin-tray",
-        category: "Resin",
-        price: 1200,
-        description: "Bring the calm of the ocean into your home. This handcrafted resin tray features layers of blue pigment and real sand, sealed to perfection. Perfect for serving drinks or displaying your favorite perfumes.",
-        images: [
-            "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&q=80&w=1000",
-            "https://images.unsplash.com/photo-1615485925763-867862f80d52?auto=format&fit=crop&q=80&w=1000",
-        ],
-        rating: 4.8,
-        reviews: 12,
-        stock: 5,
-    },
-    {
-        id: "2",
-        title: "Minimalist Concrete Planter",
-        slug: "minimalist-concrete-planter",
-        category: "Concrete",
-        price: 450,
-        description: "A sleek, modern planter made from high-quality concrete. Perfect for succulents or small houseplants.",
-        images: [
-            "https://images.unsplash.com/photo-1485955900006-10f4d324d411?auto=format&fit=crop&q=80&w=600"
-        ],
-        rating: 4.5,
-        reviews: 8,
-        stock: 12,
-    },
-    {
-        id: "3",
-        title: "Lavender Soy Candle",
-        slug: "lavender-soy-candle",
-        category: "Candle",
-        price: 850,
-        description: "Hand-poured soy wax candle with a calming lavender scent. Burns clean and lasts for up to 40 hours.",
-        images: [
-            "https://images.unsplash.com/photo-1603006905003-be475563bc59?auto=format&fit=crop&q=80&w=600"
-        ],
-        rating: 4.9,
-        reviews: 20,
-        stock: 8,
-    },
-    {
-        id: "4",
-        title: "Gold Flake Coaster Set",
-        slug: "gold-flake-coaster-set",
-        category: "Resin",
-        price: 600,
-        description: "Set of 4 elegant resin coasters embedded with gold flakes. A perfect addition to your coffee table.",
-        images: [
-            "https://images.unsplash.com/photo-1615485925763-867862f80d52?auto=format&fit=crop&q=80&w=600"
-        ],
-        rating: 4.7,
-        reviews: 15,
-        stock: 20,
-    }
-];
+// Define type based on DB schema + UI needs
+interface Product {
+    id: number;
+    title: string;
+    slug: string;
+    category: string;
+    price: number;
+    description: string;
+    images: string[];
+    rating: number;
+    reviews: number;
+    stock: number;
+}
 
-export default function ProductDetails({ slug }: { slug: string }) {
-    const product = allProducts.find((p) => p.slug === slug);
+interface ProductDetailsProps {
+    product: Product;
+}
 
-    if (!product) return notFound();
-
+export default function ProductDetails({ product }: ProductDetailsProps) {
     const [quantity, setQuantity] = useState(1);
     const [activeImage, setActiveImage] = useState(0);
     const addItem = useCartStore((state) => state.addItem);
 
     const handleAddToCart = () => {
         addItem({
-            id: product.id,
+            id: product.id.toString(),
             title: product.title,
             price: product.price,
             image: product.images[0],
