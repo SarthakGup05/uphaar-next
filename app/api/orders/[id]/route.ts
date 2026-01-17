@@ -5,15 +5,17 @@ import { eq } from "drizzle-orm";
 import { getSession } from "@/lib/auth";
 
 // PATCH: Update Order Status (e.g. Pending -> Paid)
+// PATCH: Update Order Status (e.g. Pending -> Paid)
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   try {
-    const id = parseInt(params.id);
+    const { id: paramId } = await params;
+    const id = parseInt(paramId);
     const body = await request.json(); // Expecting { status: "Paid" }
 
     const [updatedOrder] = await db
@@ -31,13 +33,14 @@ export async function PATCH(
 // DELETE: Remove an order
 export async function DELETE(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
   ) {
     const session = await getSession();
     if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   
     try {
-      const id = parseInt(params.id);
+      const { id: paramId } = await params;
+      const id = parseInt(paramId);
       await db.delete(orders).where(eq(orders.id, id));
       return NextResponse.json({ message: "Order deleted" });
     } catch (error) {

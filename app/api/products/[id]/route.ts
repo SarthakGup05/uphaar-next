@@ -1,3 +1,4 @@
+
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { products } from "@/lib/db/schema";
@@ -7,14 +8,14 @@ import { getSession } from "@/lib/auth";
 // DELETE: Remove a product (Admin Only)
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   try {
-    // Note: params.id is a string, cast to number if your DB uses integer IDs
-    const id = parseInt(params.id); 
+    const { id: paramId } = await params;
+    const id = parseInt(paramId); 
 
     await db.delete(products).where(eq(products.id, id));
 
@@ -27,13 +28,14 @@ export async function DELETE(
 // PATCH: Update stock or details (Admin Only)
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   try {
-    const id = parseInt(params.id);
+    const { id: paramId } = await params;
+    const id = parseInt(paramId);
     const body = await request.json();
 
     const [updatedProduct] = await db
