@@ -7,6 +7,7 @@ import { ArrowRight, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import api from "@/lib/axios";
+import { HeroSkeleton } from "@/components/skeletons/public-skeletons";
 
 // Interface must match DB schema + UI needs
 interface Slide {
@@ -93,7 +94,7 @@ export default function Hero() {
   };
 
   if (loading) {
-    return <div className="h-[600px] w-full bg-muted animate-pulse md:h-[700px]" />;
+    return <HeroSkeleton />;
   }
 
   if (slides.length === 0) {
@@ -142,8 +143,8 @@ export default function Hero() {
 
           {/* Text Content */}
           <div className={`absolute inset-0 flex items-center px-8 md:px-16 ${currentSlide.align === 'left' ? 'justify-start' :
-              currentSlide.align === 'right' ? 'justify-end' :
-                'justify-center text-center'
+            currentSlide.align === 'right' ? 'justify-end' :
+              'justify-center text-center'
             }`}>
             <div className="max-w-2xl text-white">
               <motion.div

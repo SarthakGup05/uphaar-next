@@ -1,11 +1,12 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { Plus, Loader2 } from "lucide-react";
+import { Plus, Loader2, Download } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { DataTable } from "@/components/data-table"; // We just created this
-import { columns, Product } from "./column"; // We just created this
+import { DataTable } from "@/components/data-table";
+import { columns, Product } from "./column";
+import { AdminTableSkeleton } from "@/components/skeletons/admin-skeletons";
 
 // 1. Fetch Function (Simulating an API call)
 import api from "@/lib/axios";
@@ -41,12 +42,7 @@ export default function AdminProductsPage() {
 
       {/* Content */}
       {isLoading ? (
-        <div className="flex h-64 items-center justify-center rounded-lg border border-stone-200 bg-white">
-          <div className="flex flex-col items-center gap-2 text-stone-500">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            <p>Loading products...</p>
-          </div>
-        </div>
+        <AdminTableSkeleton />
       ) : isError ? (
         <div className="p-4 text-red-500 bg-red-50 rounded-lg">
           Error loading products. Please try again.

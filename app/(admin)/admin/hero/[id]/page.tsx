@@ -13,6 +13,7 @@ import { Loader2 } from "lucide-react";
 import { ImageUpload } from "@/components/admin/image-upload";
 import { toast } from "sonner";
 import { Switch } from "@/components/ui/switch";
+import { AdminFormSkeleton } from "@/components/skeletons/admin-skeletons";
 import { useQuery } from "@tanstack/react-query";
 
 interface PageProps {
@@ -85,11 +86,7 @@ export default function EditHeroPage({ params }: PageProps) {
     };
 
     if (isFetching) {
-        return (
-            <div className="flex items-center justify-center min-h-[400px]">
-                <Loader2 className="h-8 w-8 animate-spin" />
-            </div>
-        );
+        return <AdminFormSkeleton />;
     }
 
     if (!slide && !isFetching) {

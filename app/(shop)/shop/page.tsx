@@ -13,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import api from "@/lib/axios";
+import { ProductGridSkeleton } from "@/components/skeletons/public-skeletons";
 
 // Define Product Interface
 interface Product {
@@ -226,11 +227,7 @@ function ShopLoadingSkeleton() {
         <div className="h-12 w-64 mx-auto bg-muted animate-pulse rounded-lg" />
         <div className="h-4 w-48 mx-auto bg-muted animate-pulse rounded" />
       </div>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {[...Array(8)].map((_, i) => (
-          <div key={i} className="aspect-[3/4] bg-muted animate-pulse rounded-xl" />
-        ))}
-      </div>
+      <ProductGridSkeleton count={8} />
     </div>
   );
 }

@@ -11,10 +11,22 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import api from "@/lib/axios";
+import { toast } from "sonner";
+import { useState } from "react";
 
 // This type definition must match your API response
 export type HeroSlide = {
@@ -83,45 +95,87 @@ export const columns: ColumnDef<HeroSlide>[] = [
     },
     {
         id: "actions",
-        cell: ({ row }) => {
-            const slide = row.original;
-            const deleteSlide = async () => {
-                if (!confirm("Are you sure you want to delete this slide?")) return;
-                try {
-                    await api.delete(`/hero/${slide.id}`);
-                    window.location.reload(); // Simple reload for now
-                } catch (e) {
-                    alert("Failed to delete slide");
-                }
-            };
-
-            return (
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                            <span className="sr-only">Open menu</span>
-                            <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem
-                            onClick={() => navigator.clipboard.writeText(slide.title)}
-                        >
-                            Copy title
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem asChild>
-                            <Link href={`/admin/hero/${slide.id}`} className="w-full cursor-pointer">
-                                Edit Slide
-                            </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={deleteSlide} className="text-red-600 focus:text-red-600">
-                            Delete Slide
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
-            );
-        },
+        cell: ({ row }) => <HeroActions slide={row.original} />,
     },
 ];
+
+function HeroActions({ slide }: { slide: HeroSlide }) {
+    const [open, setOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+
+    const deleteSlide = async () => {
+        setIsLoading(true);
+        try {
+            await api.delete(`/hero/${slide.id}`);
+            toast.success("Slide deleted successfully");
+            window.location.reload();
+        } catch (e) {
+            console.error(e);
+            toast.error("Failed to delete slide");
+        } finally {
+            setIsLoading(false);
+            setOpen(false);
+        }
+    };
+
+    return (
+        <>
+            <AlertDialog open={open} onOpenChange={setOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            This action cannot be undone. This will permanently delete the slide
+                            "{slide.title}" and remove it from the homepage.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={(e) => {
+                                e.preventDefault();
+                                deleteSlide();
+                            }}
+                            className="bg-red-600 hover:bg-red-700"
+                            disabled={isLoading}
+                        >
+                            {isLoading ? "Deleting..." : "Delete"}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="h-8 w-8 p-0">
+                        <span className="sr-only">Open menu</span>
+                        <MoreHorizontal className="h-4 w-4" />
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                    <DropdownMenuItem
+                        onClick={() => {
+                            navigator.clipboard.writeText(slide.title);
+                            toast.success("Title copied");
+                        }}
+                    >
+                        Copy title
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                        <Link href={`/admin/hero/${slide.id}`} className="w-full cursor-pointer">
+                            Edit Slide
+                        </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                        onSelect={() => setOpen(true)}
+                        className="text-red-600 focus:text-red-600 cursor-pointer"
+                    >
+                        Delete Slide
+                    </DropdownMenuItem>
+                </DropdownMenuContent>
+            </DropdownMenu>
+        </>
+    );
+}

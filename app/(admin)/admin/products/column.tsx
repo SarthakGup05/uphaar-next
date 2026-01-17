@@ -11,9 +11,21 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import Image from "next/image";
 import Link from "next/link";
 import api from "@/lib/axios";
+import { toast } from "sonner";
+import { useState } from "react";
 
 // The shape of our data
 export type Product = {
@@ -87,44 +99,84 @@ export const columns: ColumnDef<Product>[] = [
   },
   {
     id: "actions",
-    cell: ({ row }) => {
-      const product = row.original;
-
-      const deleteProduct = async () => {
-        if (!confirm("Are you sure you want to delete this product?")) return;
-        try {
-          await api.delete(`/products/${product.id}`);
-          window.location.reload();
-        } catch (e) {
-          alert("Failed to delete product");
-          console.error(e);
-        }
-      };
-
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem onClick={() => navigator.clipboard.writeText(product.id)}>
-              Copy ID
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link href={`/admin/products/${product.id}`} className="w-full cursor-pointer text-blue-600">
-                <Pencil className="mr-2 h-4 w-4" /> Edit
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={deleteProduct} className="text-red-600 focus:text-red-600 cursor-pointer">
-              <Trash2 className="mr-2 h-4 w-4" /> Delete
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
-    },
+    cell: ({ row }) => <ProductActions product={row.original} />,
   },
 ];
+
+function ProductActions({ product }: { product: Product }) {
+  const [open, setOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const deleteProduct = async () => {
+    setIsLoading(true);
+    try {
+      await api.delete(`/products/${product.id}`);
+      toast.success("Product deleted successfully");
+      window.location.reload();
+    } catch (e) {
+      console.error(e);
+      toast.error("Failed to delete product");
+    } finally {
+      setIsLoading(false);
+      setOpen(false);
+    }
+  };
+
+  return (
+    <>
+      <AlertDialog open={open} onOpenChange={setOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the product
+              "{product.title}" and remove it from our servers.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                deleteProduct();
+              }}
+              className="bg-red-600 hover:bg-red-700"
+              disabled={isLoading}
+            >
+              {isLoading ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" className="h-8 w-8 p-0">
+            <span className="sr-only">Open menu</span>
+            <MoreHorizontal className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+          <DropdownMenuItem onClick={() => {
+            navigator.clipboard.writeText(product.id);
+            toast.success("ID copied to clipboard");
+          }}>
+            Copy ID
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link href={`/admin/products/${product.id}`} className="w-full cursor-pointer text-blue-600">
+              <Pencil className="mr-2 h-4 w-4" /> Edit
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onSelect={() => setOpen(true)}
+            className="text-red-600 focus:text-red-600 cursor-pointer"
+          >
+            <Trash2 className="mr-2 h-4 w-4" /> Delete
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </>
+  );
+}

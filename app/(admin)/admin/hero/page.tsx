@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/data-table";
 import { columns, HeroSlide } from "./columns";
+import { AdminTableSkeleton } from "@/components/skeletons/admin-skeletons";
 import api from "@/lib/axios";
 
 // Fetch Function
@@ -38,12 +39,7 @@ export default function AdminHeroPage() {
 
             {/* Content */}
             {isLoading ? (
-                <div className="flex h-64 items-center justify-center rounded-lg border border-stone-200 bg-white">
-                    <div className="flex flex-col items-center gap-2 text-stone-500">
-                        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                        <p>Loading slides...</p>
-                    </div>
-                </div>
+                <AdminTableSkeleton />
             ) : isError ? (
                 <div className="p-4 text-red-500 bg-red-50 rounded-lg">
                     Error loading slides. Please try again.

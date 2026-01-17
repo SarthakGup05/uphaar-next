@@ -12,6 +12,7 @@ import { useEffect, use } from "react";
 import { Loader2 } from "lucide-react";
 import { ImageUpload } from "@/components/admin/image-upload";
 import { toast } from "sonner";
+import { AdminFormSkeleton } from "@/components/skeletons/admin-skeletons";
 import { useQuery } from "@tanstack/react-query";
 
 interface PageProps {
@@ -93,11 +94,7 @@ export default function EditProductPage({ params }: PageProps) {
     };
 
     if (isFetching) {
-        return (
-            <div className="flex items-center justify-center min-h-[400px]">
-                <Loader2 className="h-8 w-8 animate-spin" />
-            </div>
-        );
+        return <AdminFormSkeleton />;
     }
 
     return (
