@@ -19,9 +19,11 @@ const fetchOrders = async (): Promise<Order[]> => {
     return data.map((order: any) => ({
         id: `ORD-#${order.id}`,
         customer: order.customerName,
+        phone: order.customerPhone || "N/A",
         date: order.createdAt ? format(new Date(order.createdAt), "yyyy-MM-dd") : "N/A",
         total: parseFloat(order.totalAmount),
         status: order.status,
+        itemsSummary: order.itemsSummary || "N/A",
         items: 1, // Simplified as DB stores summary string, not count
     }));
 };
@@ -44,13 +46,36 @@ export default function AdminOrdersPage() {
                 <div className="flex gap-2">
                     <Button variant="outline" className="gap-2" onClick={() => {
                         if (!data) return;
+
+                        // Helper to escape CSV fields
+                        const escapeCsv = (str: string | number) => {
+                            if (str === null || str === undefined) return "";
+                            const stringValue = String(str);
+                            if (stringValue.includes(",") || stringValue.includes('"') || stringValue.includes("\n")) {
+                                return `"${stringValue.replace(/"/g, '""')}"`;
+                            }
+                            return stringValue;
+                        };
+
+                        const headers = ["ID", "Customer", "Phone", "Date", "Status", "Total", "Items Summary"];
+                        const rows = data.map((o: any) => [
+                            o.id,
+                            o.customer,
+                            o.phone,
+                            o.date,
+                            o.status,
+                            o.total,
+                            o.itemsSummary
+                        ].map(escapeCsv).join(","));
+
                         const csvContent = "data:text/csv;charset=utf-8,"
-                            + "ID,Customer,Date,Status,Total\n"
-                            + data.map(o => `${o.id},"${o.customer}",${o.date},${o.status},${o.total}`).join("\n");
+                            + headers.join(",") + "\n"
+                            + rows.join("\n");
+
                         const encodedUri = encodeURI(csvContent);
                         const link = document.createElement("a");
                         link.setAttribute("href", encodedUri);
-                        link.setAttribute("download", "orders.csv");
+                        link.setAttribute("download", `orders-${format(new Date(), "yyyy-MM-dd")}.csv`);
                         document.body.appendChild(link);
                         link.click();
                         document.body.removeChild(link);
