@@ -8,40 +8,12 @@ import { DataTable } from "@/components/data-table"; // We just created this
 import { columns, Product } from "./column"; // We just created this
 
 // 1. Fetch Function (Simulating an API call)
-const fetchProducts = async (): Promise<Product[]> => {
-  // Simulate network delay
-  await new Promise((resolve) => setTimeout(resolve, 1000));
+import api from "@/lib/axios";
 
-  return [
-    {
-      id: "PROD-1",
-      title: "Ocean Blue Resin Tray",
-      category: "Resin",
-      price: 1200,
-      stock: 5,
-      image: "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&q=80&w=100",
-      status: "active",
-    },
-    {
-      id: "PROD-2",
-      title: "Minimalist Concrete Planter",
-      category: "Concrete",
-      price: 450,
-      stock: 12,
-      image: "https://images.unsplash.com/photo-1485955900006-10f4d324d411?auto=format&fit=crop&q=80&w=100",
-      status: "active",
-    },
-    {
-      id: "PROD-3",
-      title: "Lavender Soy Candle",
-      category: "Candles",
-      price: 850,
-      stock: 24,
-      image: "https://images.unsplash.com/photo-1603006905003-be475563bc59?auto=format&fit=crop&q=80&w=100",
-      status: "active",
-    },
-    // Add more mock data to test pagination...
-  ];
+// 1. Fetch Function (Real API call)
+const fetchProducts = async (): Promise<Product[]> => {
+  const { data } = await api.get("/products");
+  return data;
 };
 
 export default function AdminProductsPage() {
@@ -53,7 +25,7 @@ export default function AdminProductsPage() {
 
   return (
     <div className="space-y-6">
-      
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>

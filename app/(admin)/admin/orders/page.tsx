@@ -7,52 +7,22 @@ import { DataTable } from "@/components/data-table";
 import { columns, Order } from "./columns";
 import Link from "next/link";
 
-// 1. Fetch Function (Mocking your manual ledger)
-const fetchOrders = async (): Promise<Order[]> => {
-    await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate delay
+import api from "@/lib/axios";
+import { format } from "date-fns";
 
-    return [
-        {
-            id: "ORD-001",
-            customer: "Aditi Sharma",
-            date: "2024-03-10",
-            total: 2450,
-            status: "Pending", // Just received WhatsApp msg
-            items: 3,
-        },
-        {
-            id: "ORD-002",
-            customer: "Rahul Verma",
-            date: "2024-03-09",
-            total: 850,
-            status: "Paid", // Sent screenshot
-            items: 1,
-        },
-        {
-            id: "ORD-003",
-            customer: "Priya Singh",
-            date: "2024-03-08",
-            total: 4200,
-            status: "Shipped", // Courier booked
-            items: 5,
-        },
-        {
-            id: "ORD-004",
-            customer: "Amit Patel",
-            date: "2024-03-08",
-            total: 1200,
-            status: "Delivered",
-            items: 1,
-        },
-        {
-            id: "ORD-005",
-            customer: "Sneha Gupta",
-            date: "2024-03-05",
-            total: 0,
-            status: "Cancelled",
-            items: 0,
-        },
-    ];
+// 1. Fetch Function (Real API call)
+const fetchOrders = async (): Promise<Order[]> => {
+    const { data } = await api.get("/orders");
+
+    // Map DB response to UI model
+    return data.map((order: any) => ({
+        id: `ORD-#${order.id}`,
+        customer: order.customerName,
+        date: order.createdAt ? format(new Date(order.createdAt), "yyyy-MM-dd") : "N/A",
+        total: parseFloat(order.totalAmount),
+        status: order.status,
+        items: 1, // Simplified as DB stores summary string, not count
+    }));
 };
 
 export default function AdminOrdersPage() {

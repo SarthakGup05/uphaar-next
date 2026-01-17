@@ -12,58 +12,17 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import api from "@/lib/axios";
 
-// UPDATED MOCK DATA with 'slug'
-const allProducts = [
-  {
-    id: 1,
-    title: "Ocean Blue Resin Tray",
-    slug: "ocean-blue-resin-tray",
-    category: "Resin",
-    price: 1200,
-    image: "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&q=80&w=600",
-  },
-  {
-    id: 2,
-    title: "Minimalist Concrete Planter",
-    slug: "minimalist-concrete-planter",
-    category: "Concrete",
-    price: 450,
-    image: "https://images.unsplash.com/photo-1485955900006-10f4d324d411?auto=format&fit=crop&q=80&w=600",
-  },
-  {
-    id: 3,
-    title: "Lavender Soy Candle",
-    slug: "lavender-soy-candle",
-    category: "Candles",
-    price: 850,
-    image: "https://images.unsplash.com/photo-1603006905003-be475563bc59?auto=format&fit=crop&q=80&w=600",
-  },
-  {
-    id: 4,
-    title: "Gold Flake Coaster Set",
-    slug: "gold-flake-coaster-set",
-    category: "Resin",
-    price: 600,
-    image: "https://images.unsplash.com/photo-1615485925763-867862f80d52?auto=format&fit=crop&q=80&w=600",
-  },
-  {
-    id: 5,
-    title: "Geometric Concrete Tray",
-    slug: "geometric-concrete-tray",
-    category: "Concrete",
-    price: 550,
-    image: "https://images.unsplash.com/photo-1516975080664-ed2fc6a32937?auto=format&fit=crop&q=80&w=600",
-  },
-  {
-    id: 6,
-    title: "Rose & Sandalwood Candle",
-    slug: "rose-sandalwood-candle",
-    category: "Candles",
-    price: 900,
-    image: "https://images.unsplash.com/photo-1596436081179-8b277b089c25?auto=format&fit=crop&q=80&w=600",
-  },
-];
+// Define Product Interface
+interface Product {
+  id: number;
+  title: string;
+  slug: string;
+  category: string;
+  price: string | number; // Handling both as API might return string
+  image: string;
+}
 
 const categories = ["All", "Resin", "Candles", "Concrete", "Gifts"];
 
@@ -71,6 +30,11 @@ const categories = ["All", "Resin", "Candles", "Concrete", "Gifts"];
 function ShopContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
+
+  // State
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   // Get category from URL or default to 'All'
   const initialCategory = searchParams.get("category") || "All";
@@ -89,13 +53,33 @@ function ShopContent() {
     }
   }, [searchParams]);
 
+  // Fetch Products from API
+  useEffect(() => {
+    const fetchProducts = async () => {
+      setLoading(true);
+      try {
+        const response = await api.get("/products");
+        setProducts(response.data);
+      } catch (err: any) {
+        console.error("Failed to fetch products:", err);
+        setError("Failed to load products. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
   // Filtering Logic
-  const filteredProducts = allProducts
+  const filteredProducts = products
     .filter((product) => activeCategory === "All" || product.category === activeCategory)
     .sort((a, b) => {
-      if (sortOrder === "price-low") return a.price - b.price;
-      if (sortOrder === "price-high") return b.price - a.price;
-      return 0; // Newest (Default ID sort)
+      const priceA = Number(a.price);
+      const priceB = Number(b.price);
+      if (sortOrder === "price-low") return priceA - priceB;
+      if (sortOrder === "price-high") return priceB - priceA;
+      return 0; // Newest (Default ID sort strategy if DB returns sorted by ID/Time)
     });
 
   const handleCategoryChange = (cat: string) => {
@@ -107,6 +91,19 @@ function ShopContent() {
       router.push(`/shop?category=${cat.toLowerCase()}`);
     }
   };
+
+  if (loading) return <ShopLoadingSkeleton />;
+
+  if (error) {
+    return (
+      <div className="container mx-auto px-4 py-20 text-center text-red-500">
+        <p>{error}</p>
+        <Button variant="outline" className="mt-4" onClick={() => window.location.reload()}>
+          Retry
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4">
@@ -182,9 +179,9 @@ function ShopContent() {
               <ProductCard
                 title={product.title}
                 category={product.category}
-                price={product.price}
+                price={Number(product.price)}
                 image={product.image}
-                slug={product.slug} // ADDED THIS PROP
+                slug={product.slug}
               />
             </motion.div>
           ))}
