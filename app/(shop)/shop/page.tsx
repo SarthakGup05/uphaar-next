@@ -25,7 +25,7 @@ interface Product {
   image: string;
 }
 
-const categories = ["All", "Resin", "Candles", "Concrete", "Gifts"];
+const categories = ["All", "Resin", "Candles", "Concrete Decor", "Gift Hampers"];
 
 // 1. Extract the main logic into a component that uses searchParams
 function ShopContent() {
@@ -38,17 +38,20 @@ function ShopContent() {
   const [error, setError] = useState("");
 
   // Get category from URL or default to 'All'
-  const initialCategory = searchParams.get("category") || "All";
-  const [activeCategory, setActiveCategory] = useState(initialCategory);
+  const initialCategory = searchParams.get("category");
+  // Find matching category from our list (case-insensitive) or default to "All"
+  const matchedCategory = categories.find(c => c.toLowerCase() === initialCategory?.toLowerCase()) || "All";
+
+  const [activeCategory, setActiveCategory] = useState(matchedCategory);
   const [sortOrder, setSortOrder] = useState("newest");
 
   // Sync state with URL if user clicks Navbar links
   useEffect(() => {
     const categoryFromUrl = searchParams.get("category");
     if (categoryFromUrl) {
-      // Simple capitalization for display matching
-      const formatted = categoryFromUrl.charAt(0).toUpperCase() + categoryFromUrl.slice(1);
-      setActiveCategory(formatted);
+      // Find exact match from our defined categories
+      const match = categories.find(c => c.toLowerCase() === categoryFromUrl.toLowerCase());
+      setActiveCategory(match || "All");
     } else {
       setActiveCategory("All");
     }
@@ -89,7 +92,8 @@ function ShopContent() {
     if (cat === "All") {
       router.push("/shop");
     } else {
-      router.push(`/shop?category=${cat.toLowerCase()}`);
+      // Use encodeURIComponent to handle spaces correctly
+      router.push(`/shop?category=${encodeURIComponent(cat.toLowerCase())}`);
     }
   };
 

@@ -1,19 +1,28 @@
-
 "use client";
 
-import { useProductStore } from "@/lib/store/product-store";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
+import {
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+    FormDescription,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useRouter } from "next/navigation";
-import { useEffect, use } from "react";
+import { use, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { ImageUpload } from "@/components/admin/image-upload";
 import { toast } from "sonner";
 import { AdminFormSkeleton } from "@/components/skeletons/admin-skeletons";
 import { useQuery } from "@tanstack/react-query";
+import { productSchema, type ProductFormValues } from "@/lib/schemas";
 
 interface PageProps {
     params: Promise<{ id: string }>;
@@ -22,7 +31,6 @@ interface PageProps {
 export default function EditProductPage({ params }: PageProps) {
     const { id } = use(params);
     const router = useRouter();
-    const { formData, isLoading, isUploading, setField, setFormData, setLoading, resetForm } = useProductStore();
 
     // Fetch product data
     const { data: product, isLoading: isFetching } = useQuery({
@@ -34,10 +42,24 @@ export default function EditProductPage({ params }: PageProps) {
         },
     });
 
-    // Populate store when data is fetched
+    const form = useForm<ProductFormValues>({
+        resolver: zodResolver(productSchema) as any,
+        defaultValues: {
+            title: "",
+            slug: "",
+            description: "",
+            price: 0,
+            stock: 0,
+            category: "Resin",
+            imageUrl: "",
+            heroImageUrl: "",
+        },
+    });
+
+    // Populate form when data is fetched
     useEffect(() => {
         if (product) {
-            setFormData({
+            form.reset({
                 title: product.title,
                 slug: product.slug,
                 description: product.description,
@@ -48,32 +70,19 @@ export default function EditProductPage({ params }: PageProps) {
                 heroImageUrl: product.heroImage || "",
             });
         }
-    }, [product, setFormData]);
+    }, [product, form]);
 
-    // Cleanup store on unmount
-    useEffect(() => {
-        return () => resetForm();
-    }, [resetForm]);
+    const isSubmitting = form.formState.isSubmitting;
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-
-        // Basic Validation
-        if (!formData.title || !formData.slug || !formData.imageUrl) {
-            toast.error("Please fill in all required fields and upload an image.");
-            return;
-        }
-
-        setLoading(true);
-
+    const onSubmit = async (values: ProductFormValues) => {
         try {
             const response = await fetch(`/api/products/${id}`, {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    ...formData,
-                    image: formData.imageUrl, // Map imageUrl to image for DB
-                    heroImage: formData.heroImageUrl || null,
+                    ...values,
+                    image: values.imageUrl, // Map imageUrl to image for DB
+                    heroImage: values.heroImageUrl || null,
                 }),
             });
 
@@ -87,9 +96,7 @@ export default function EditProductPage({ params }: PageProps) {
             router.push("/admin/products");
         } catch (error) {
             console.error(error);
-            toast.error("Failed to update product");
-        } finally {
-            setLoading(false);
+            toast.error(error instanceof Error ? error.message : "Failed to update product");
         }
     };
 
@@ -104,118 +111,208 @@ export default function EditProductPage({ params }: PageProps) {
                 <p className="text-muted-foreground">Update product details and images.</p>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
 
-                {/* Basic Info */}
-                <div className="space-y-2">
-                    <Label>Title</Label>
-                    <Input
-                        placeholder="Ocean Breeze Coaster"
-                        value={formData.title}
-                        onChange={(e) => {
-                            setField("title", e.target.value);
-                            // Auto-generate slug from title if slug is empty or matches old slug (optional, skipped for now to avoid complexity)
-                        }}
-                        required
-                    />
-                </div>
-
-                <div className="space-y-2">
-                    <Label>Slug</Label>
-                    <Input
-                        placeholder="ocean-breeze-coaster"
-                        value={formData.slug}
-                        onChange={(e) => setField("slug", e.target.value)}
-                        required
-                    />
-                </div>
-
-                <div className="space-y-2">
-                    <Label>Description</Label>
-                    <Textarea
-                        placeholder="Product description..."
-                        className="resize-none min-h-[100px]"
-                        value={formData.description}
-                        onChange={(e) => setField("description", e.target.value)}
-                        required
-                    />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
+                    {/* Basic Info */}
                     <div className="space-y-2">
-                        <Label>Price (₹)</Label>
-                        <Input
-                            type="number"
-                            step="0.01"
-                            placeholder="499"
-                            value={formData.price}
-                            onChange={(e) => setField("price", parseFloat(e.target.value) || 0)}
-                            required
+                        <FormField
+                            control={form.control}
+                            name="title"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Title</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            placeholder="Ocean Breeze Coaster"
+                                            maxLength={100}
+                                            {...field}
+                                            onChange={(e) => {
+                                                field.onChange(e);
+                                                // Optional: Generate slug on title change if slug is untouched?
+                                                // For edit, we typically don't auto-update slug to preserve URLs unless requested.
+                                                // User can manually edit slug if needed.
+                                            }}
+                                        />
+                                    </FormControl>
+                                    <FormDescription>
+                                        Min 15 chars. ({field.value?.length || 0} / 100)
+                                    </FormDescription>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
                         />
-                    </div>
-                    <div className="space-y-2">
-                        <Label>Stock</Label>
-                        <Input
-                            type="number"
-                            placeholder="10"
-                            value={formData.stock}
-                            onChange={(e) => setField("stock", parseInt(e.target.value) || 0)}
-                            required
-                        />
-                    </div>
-                </div>
-
-                <div className="space-y-2">
-                    <Label>Category</Label>
-                    <Select
-                        value={formData.category}
-                        onValueChange={(val) => setField("category", val)}
-                    >
-                        <SelectTrigger>
-                            <SelectValue placeholder="Select category" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="Resin">Resin</SelectItem>
-                            <SelectItem value="Candles">Candles</SelectItem>
-                            <SelectItem value="Decor">Decor</SelectItem>
-                        </SelectContent>
-                    </Select>
-                </div>
-
-                {/* Images */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                        <Label>Product Image</Label>
-                        <ImageUpload
-                            value={formData.imageUrl}
-                            onChange={(url) => setField("imageUrl", url)}
-                            folder="/products"
-                        />
-                        <p className="text-xs text-muted-foreground">Main product image.</p>
                     </div>
 
                     <div className="space-y-2">
-                        <Label>Hero Image (Optional)</Label>
-                        <ImageUpload
-                            value={formData.heroImageUrl || ""}
-                            onChange={(url) => setField("heroImageUrl", url)}
-                            folder="/products/hero"
+                        <FormField
+                            control={form.control}
+                            name="slug"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Slug</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="ocean-breeze-coaster" {...field} />
+                                    </FormControl>
+                                    <FormDescription>URL-friendly name.</FormDescription>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
                         />
-                        <p className="text-xs text-muted-foreground">Displayed in large banners.</p>
                     </div>
-                </div>
 
-                {/* Actions */}
-                <div className="flex justify-end gap-4 pt-4">
-                    <Button variant="outline" type="button" onClick={() => router.back()}>
-                        Cancel
-                    </Button>
-                    <Button type="submit" disabled={isLoading || isUploading}>
-                        {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        Update Product
-                    </Button>
-                </div>
-            </form>
+                    <div className="space-y-2">
+                        <FormField
+                            control={form.control}
+                            name="description"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Description</FormLabel>
+                                    <FormControl>
+                                        <Textarea
+                                            placeholder="Product description..."
+                                            className="resize-none min-h-[100px]"
+                                            maxLength={2000}
+                                            {...field}
+                                        />
+                                    </FormControl>
+                                    <FormDescription>
+                                        Min 200 chars. ({field.value?.length || 0} / 2000)
+                                    </FormDescription>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <FormField
+                                control={form.control}
+                                name="price"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Price (₹)</FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                type="number"
+                                                step="0.01"
+                                                placeholder="499"
+                                                {...field}
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <FormField
+                                control={form.control}
+                                name="stock"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Stock</FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                type="number"
+                                                placeholder="10"
+                                                {...field}
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
+                    </div>
+
+                    <div className="space-y-2">
+                        <FormField
+                            control={form.control}
+                            name="category"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Category</FormLabel>
+                                    <Select
+                                        onValueChange={field.onChange}
+                                        value={field.value} // Use value from field, controlled
+                                    >
+                                        <FormControl>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select category" />
+                                            </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                            <SelectItem value="Resin">Resin</SelectItem>
+                                            <SelectItem value="Candles">Candles</SelectItem>
+                                            <SelectItem value="Concrete Decor">Concrete Decor</SelectItem>
+                                            <SelectItem value="Gift Hampers">Gift Hampers</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </div>
+
+                    {/* Images */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                            <FormField
+                                control={form.control}
+                                name="imageUrl"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Product Image</FormLabel>
+                                        <FormControl>
+                                            <ImageUpload
+                                                value={field.value}
+                                                onChange={field.onChange}
+                                                folder="/products"
+                                            />
+                                        </FormControl>
+                                        <FormDescription>Main product image.</FormDescription>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                            <FormField
+                                control={form.control}
+                                name="heroImageUrl"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Hero Image (Optional)</FormLabel>
+                                        <FormControl>
+                                            <ImageUpload
+                                                value={field.value || ""}
+                                                onChange={field.onChange}
+                                                folder="/products/hero"
+                                            />
+                                        </FormControl>
+                                        <FormDescription>Displayed in large banners.</FormDescription>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex justify-end gap-4 pt-4">
+                        <Button variant="outline" type="button" onClick={() => router.back()}>
+                            Cancel
+                        </Button>
+                        <Button type="submit" disabled={isSubmitting}>
+                            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            Update Product
+                        </Button>
+                    </div>
+                </form>
+            </Form>
         </div>
     );
 }

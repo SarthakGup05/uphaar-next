@@ -1,10 +1,17 @@
 "use client";
 
-import { useProductStore } from "@/lib/store/product-store"; // Import Zustand store
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import {
-    Label
-} from "@/components/ui/label";
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+    FormDescription,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -17,54 +24,51 @@ import {
 import { ArrowLeft, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ImageUpload } from "@/components/admin/image-upload"; // Import new component
-import { useEffect } from "react";
-import { toast } from "sonner"; // Assuming sonner is installed/used for toasts
+import { ImageUpload } from "@/components/admin/image-upload";
+import { toast } from "sonner";
+import { productSchema, type ProductFormValues } from "@/lib/schemas";
 
 export default function AddProductPage() {
     const router = useRouter();
-    // Destructure store state and actions
-    const { formData, isLoading, isUploading, setField, setLoading, resetForm } = useProductStore();
 
-    // Reset form on mount
-    useEffect(() => {
-        resetForm();
-    }, [resetForm]);
+    const form = useForm<ProductFormValues>({
+        resolver: zodResolver(productSchema) as any,
+        defaultValues: {
+            title: "",
+            slug: "",
+            description: "",
+            price: 0,
+            stock: 0,
+            category: "Resin", // Default valid category
+            imageUrl: "",
+            heroImageUrl: "",
+        },
+    });
 
-    // Handle Submission
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const isSubmitting = form.formState.isSubmitting;
 
-        // Basic Validation
-        if (!formData.title || !formData.slug || !formData.imageUrl) {
-            toast.error("Please fill in all required fields and upload an image.");
-            return;
-        }
-
-        setLoading(true);
-
+    const onSubmit = async (values: ProductFormValues) => {
         try {
             const response = await fetch("/api/products", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    ...formData,
-                    image: formData.imageUrl, // Map imageUrl to image for DB
+                    ...values,
+                    image: values.imageUrl, // Map for API
                 }),
             });
 
             if (!response.ok) {
-                throw new Error("Failed to create product");
+                const errorData = await response.json();
+                throw new Error(errorData.error || "Failed to create product");
             }
 
             toast.success("Product created successfully!");
             router.push("/admin/products");
-            router.refresh(); // Refresh Next.js cache
+            router.refresh();
         } catch (error) {
             console.error(error);
-            toast.error("Something went wrong.");
-        } finally {
-            setLoading(false);
+            toast.error(error instanceof Error ? error.message : "Something went wrong.");
         }
     };
 
@@ -81,157 +85,207 @@ export default function AddProductPage() {
                 <h1 className="font-serif text-2xl font-bold">Add New Product</h1>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-8">
+            <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-                    {/* LEFT COLUMN: Main Info */}
-                    <div className="lg:col-span-2 space-y-8">
-                        {/* Basic Details Card */}
-                        <div className="rounded-xl border border-stone-200 bg-white p-6 space-y-6">
-                            <div className="space-y-1">
-                                <h2 className="font-semibold text-lg">Product Details</h2>
-                                <p className="text-sm text-muted-foreground">Title, description and URL settings.</p>
-                            </div>
+                        {/* LEFT COLUMN: Main Info */}
+                        <div className="lg:col-span-2 space-y-8">
+                            {/* Basic Details Card */}
+                            <div className="rounded-xl border border-stone-200 bg-white p-6 space-y-6">
+                                <div className="space-y-1">
+                                    <h2 className="font-semibold text-lg">Product Details</h2>
+                                    <p className="text-sm text-muted-foreground">Title, description and URL settings.</p>
+                                </div>
 
-                            <div className="space-y-2">
-                                <Label>Product Title</Label>
-                                <Input
-                                    placeholder="e.g. Ocean Blue Resin Tray"
-                                    value={formData.title}
-                                    onChange={(e) => setField('title', e.target.value)}
-                                    required
+                                <FormField
+                                    control={form.control}
+                                    name="title"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Product Title</FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    placeholder="e.g. Ocean Blue Resin Tray"
+                                                    maxLength={100}
+                                                    {...field}
+                                                    onChange={(e) => {
+                                                        field.onChange(e);
+                                                        // Auto-generate slug
+                                                        const slug = e.target.value
+                                                            .toLowerCase()
+                                                            .replace(/[^a-z0-9]+/g, '-')
+                                                            .replace(/^-+|-+$/g, '');
+                                                        form.setValue("slug", slug, { shouldValidate: true });
+                                                    }}
+                                                />
+                                            </FormControl>
+                                            <FormDescription>
+                                                Min 15 chars. ({field.value?.length || 0} / 100)
+                                            </FormDescription>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+
+                                <FormField
+                                    control={form.control}
+                                    name="slug"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Slug</FormLabel>
+                                            <FormControl>
+                                                <Input placeholder="ocean-blue-resin-tray" {...field} />
+                                            </FormControl>
+                                            <FormDescription>URL-friendly name.</FormDescription>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+
+                                <FormField
+                                    control={form.control}
+                                    name="description"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Description</FormLabel>
+                                            <FormControl>
+                                                <Textarea
+                                                    placeholder="Describe the product details, materials used, etc."
+                                                    className="min-h-[150px]"
+                                                    maxLength={2000}
+                                                    {...field}
+                                                />
+                                            </FormControl>
+                                            <FormDescription>
+                                                Min 200 chars. ({field.value?.length || 0} / 2000)
+                                            </FormDescription>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
                                 />
                             </div>
 
-                            <div className="space-y-2">
-                                <Label>Slug</Label>
-                                <Input
-                                    placeholder="ocean-blue-resin-tray"
-                                    value={formData.slug}
-                                    onChange={(e) => setField('slug', e.target.value)}
-                                    required
-                                />
-                                <p className="text-[0.8rem] text-muted-foreground">
-                                    The URL-friendly version of the name.
-                                </p>
-                            </div>
+                            {/* Media Card */}
+                            <div className="rounded-xl border border-stone-200 bg-white p-6 space-y-6">
+                                <h2 className="font-semibold text-lg">Product Images</h2>
 
-                            <div className="space-y-2">
-                                <Label>Description</Label>
-                                <Textarea
-                                    placeholder="Describe the product details, materials used, etc."
-                                    className="min-h-[150px]"
-                                    value={formData.description}
-                                    onChange={(e) => setField('description', e.target.value)}
-                                    required
-                                />
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <FormField
+                                        control={form.control}
+                                        name="imageUrl"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Main Image *</FormLabel>
+                                                <FormControl>
+                                                    <ImageUpload
+                                                        value={field.value}
+                                                        onChange={field.onChange}
+                                                        folder="/products/main"
+                                                    />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+
+                                    <FormField
+                                        control={form.control}
+                                        name="heroImageUrl"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Hero/Banner Image (Optional)</FormLabel>
+                                                <FormControl>
+                                                    <ImageUpload
+                                                        value={field.value || ""}
+                                                        onChange={field.onChange}
+                                                        folder="/products/hero"
+                                                    />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                </div>
                             </div>
                         </div>
 
-                        {/* Media Card */}
-                        <div className="rounded-xl border border-stone-200 bg-white p-6 space-y-6">
-                            <h2 className="font-semibold text-lg">Product Images</h2>
+                        {/* RIGHT COLUMN: Settings */}
+                        <div className="space-y-8">
+                            <div className="rounded-xl border border-stone-200 bg-white p-6 space-y-6">
+                                <h2 className="font-semibold text-lg">Status & Inventory</h2>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="space-y-2">
-                                    <Label>Main Image *</Label>
-                                    <ImageUpload
-                                        value={formData.imageUrl}
-                                        onChange={(url) => setField("imageUrl", url)} // Mapped to 'image' in DB eventually
-                                        folder="/products/main"
-                                    />
-                                    {/* Sync to 'image' field expected by DB schema */}
-                                    {/* Actually schema expects 'image'. Store has 'imageUrl'. 
-                                        We need to make sure we send 'image': formData.imageUrl 
-                                        Need to fix store to match schema or map it in submit. 
-                                        Let's update store to match schema 'image' or map it. 
-                                        Plan: Store uses 'imageUrl', submit maps to 'image'. 
-                                        Wait, checking previous step... Schema has 'image'. API expects 'image'.
-                                        Store has 'imageUrl'. 
-                                        I will map in submit, but wait... 
-                                        The previous API edit expected body.image. 
-                                        I am sending JSON.stringify(formData). 
-                                        So formData MUST have 'image' property OR I construct body manually.
-                                        I will update setField calls to map correctly? 
-                                        Actually, better to rename store key to 'image' to match schema? 
-                                        Too late for store file, I'll just map in `handleSubmit` or use `setField('image'...)` if I change the mapped key. 
-                                        Let's assume I fix the mapping in handleSubmit.
-                                     */}
-                                </div>
+                                <FormField
+                                    control={form.control}
+                                    name="category"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Category</FormLabel>
+                                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                <FormControl>
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="Select category" />
+                                                    </SelectTrigger>
+                                                </FormControl>
+                                                <SelectContent>
+                                                    <SelectItem value="Resin">Resin</SelectItem>
+                                                    <SelectItem value="Candles">Candles</SelectItem>
+                                                    <SelectItem value="Concrete Decor">Concrete Decor</SelectItem>
+                                                    <SelectItem value="Gift Hampers">Gift Hampers</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
 
-                                <div className="space-y-2">
-                                    <Label>Hero/Banner Image (Optional)</Label>
-                                    <ImageUpload
-                                        value={formData.heroImageUrl}
-                                        onChange={(url) => setField("heroImageUrl", url)}
-                                        folder="/products/hero"
+                                <div className="grid grid-cols-2 gap-4">
+                                    <FormField
+                                        control={form.control}
+                                        name="price"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Price (₹)</FormLabel>
+                                                <FormControl>
+                                                    <Input type="number" {...field} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+
+                                    <FormField
+                                        control={form.control}
+                                        name="stock"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Stock</FormLabel>
+                                                <FormControl>
+                                                    <Input type="number" {...field} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
                                     />
                                 </div>
+                            </div>
+
+                            {/* Sticky Actions */}
+                            <div className="flex flex-col gap-3">
+                                <Button type="submit" size="lg" disabled={isSubmitting} className="w-full">
+                                    {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                    {isSubmitting ? "Saving..." : "Create Product"}
+                                </Button>
+                                <Link href="/admin/products" className="w-full">
+                                    <Button variant="outline" type="button" className="w-full">Discard</Button>
+                                </Link>
                             </div>
                         </div>
                     </div>
 
-                    {/* RIGHT COLUMN: Settings */}
-                    <div className="space-y-8">
-                        <div className="rounded-xl border border-stone-200 bg-white p-6 space-y-6">
-                            <h2 className="font-semibold text-lg">Status & Inventory</h2>
-
-                            <div className="space-y-2">
-                                <Label>Category</Label>
-                                <Select
-                                    value={formData.category}
-                                    onValueChange={(val) => setField('category', val)}
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select category" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="Resin">Resin Art</SelectItem>
-                                        <SelectItem value="Candles">Candles</SelectItem>
-                                        <SelectItem value="Concrete">Concrete</SelectItem>
-                                        <SelectItem value="Gifts">Gift Hampers</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <Label>Price (₹)</Label>
-                                    <Input
-                                        type="number"
-                                        value={formData.price}
-                                        onChange={(e) => setField('price', Number(e.target.value))}
-                                        required
-                                    />
-                                </div>
-
-                                <div className="space-y-2">
-                                    <Label>Stock</Label>
-                                    <Input
-                                        type="number"
-                                        value={formData.stock}
-                                        onChange={(e) => setField('stock', Number(e.target.value))}
-                                        required
-                                    />
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Sticky Actions */}
-                        <div className="flex flex-col gap-3">
-                            <Button type="submit" size="lg" disabled={isLoading || isUploading} className="w-full">
-                                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                {isLoading ? "Saving..." : "Create Product"}
-                            </Button>
-                            <Link href="/admin/products" className="w-full">
-                                <Button variant="outline" type="button" className="w-full">Discard</Button>
-                            </Link>
-                        </div>
-                    </div>
-                </div>
-
-            </form>
+                </form>
+            </Form>
         </div>
     );
 }

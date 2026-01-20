@@ -90,7 +90,7 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
                             </AnimatePresence>
 
                             <div className="absolute left-4 top-4">
-                                <Badge className="bg-white/90 text-black backdrop-blur-md hover:bg-white">Handmade</Badge>
+                                <Badge className="bg-stone-900/90 text-white backdrop-blur-md hover:bg-black">Handmade</Badge>
                             </div>
                         </div>
 
@@ -114,7 +114,7 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
                     {/* RIGHT: Product Details */}
                     <div className="flex flex-col pt-2">
                         <div className="mb-2 flex items-center gap-2">
-                            <Badge variant="outline" className="border-secondary text-secondary">{product.category}</Badge>
+                            <Badge className="bg-stone-900 text-white hover:bg-black">{product.category}</Badge>
                             {product.stock < 5 && <span className="text-xs font-medium text-red-500">Only {product.stock} left!</span>}
                         </div>
 
