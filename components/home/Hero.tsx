@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useState, useEffect, useCallback } from "react";
-import { motion, AnimatePresence, Variants } from "framer-motion";
+import { m, AnimatePresence, Variants } from "framer-motion";
 import Link from "next/link";
 import { ArrowRight, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -107,7 +107,7 @@ export default function Hero() {
   return (
     <section className="relative h-[85vh] min-h-[600px] w-full overflow-hidden bg-background">
       <AnimatePresence initial={false} custom={direction} mode="popLayout">
-        <motion.div
+        <m.div
           key={page}
           custom={direction}
           variants={slideVariants}
@@ -133,7 +133,7 @@ export default function Hero() {
         >
           {/* Background Image with Zoom Effect */}
           <div className="relative h-full w-full overflow-hidden">
-            <motion.div
+            <m.div
               initial={{ scale: 1 }}
               animate={{ scale: 1.1 }}
               transition={{ duration: 10, ease: "linear" }}
@@ -149,7 +149,7 @@ export default function Hero() {
                 priority
                 fetchPriority="high"
               />
-            </motion.div>
+            </m.div>
             {/* Premium Gradient Overlay */}
             <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
@@ -161,7 +161,7 @@ export default function Hero() {
               'justify-center text-center'
             }`}>
             <div className="max-w-3xl text-white pt-20">
-              <motion.div
+              <m.div
                 key={`text-${page}`}
                 initial="hidden"
                 animate="visible"
@@ -170,22 +170,22 @@ export default function Hero() {
                   visible: { transition: { staggerChildren: 0.15 } }
                 }}
               >
-                <motion.div variants={textVariants} className="mb-4 flex items-center gap-3">
+                <m.div variants={textVariants} className="mb-4 flex items-center gap-3">
                   <span className="h-px w-12 bg-accent/80"></span>
                   <span className="text-sm font-semibold uppercase tracking-[0.2em] text-accent">
                     Handcrafted Luxury
                   </span>
-                </motion.div>
+                </m.div>
 
-                <motion.h1 variants={textVariants} className="mb-6 font-serif text-6xl font-bold leading-tight md:text-8xl drop-shadow-lg">
+                <m.h1 variants={textVariants} className="mb-6 font-serif text-6xl font-bold leading-tight md:text-8xl drop-shadow-lg">
                   {currentSlide.title}
-                </motion.h1>
+                </m.h1>
 
-                <motion.p variants={textVariants} className="mb-10 text-lg font-light leading-relaxed text-white/90 md:text-2xl md:max-w-2xl drop-shadow-sm">
+                <m.p variants={textVariants} className="mb-10 text-lg font-light leading-relaxed text-white/90 md:text-2xl md:max-w-2xl drop-shadow-sm">
                   {currentSlide.subtitle}
-                </motion.p>
+                </m.p>
 
-                <motion.div variants={textVariants} className="flex flex-wrap gap-4">
+                <m.div variants={textVariants} className="flex flex-wrap gap-4">
                   <Button asChild size="lg" className="h-14 rounded-full bg-white px-8 text-base font-semibold text-black transition-all hover:bg-stone-200 hover:scale-105 active:scale-95">
                     <Link href={currentSlide.cta.toLowerCase().includes("shop") ? "/shop" : "/about"}>
                       Shop Collection
@@ -196,11 +196,11 @@ export default function Hero() {
                       View Gallery
                     </Link>
                   </Button>
-                </motion.div>
-              </motion.div>
+                </m.div>
+              </m.div>
             </div>
           </div>
-        </motion.div>
+        </m.div>
       </AnimatePresence>
 
       {/* Navigation Buttons */}

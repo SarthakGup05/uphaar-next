@@ -3,6 +3,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
 import { ImageKitProvider } from "@imagekit/next";
+import { LazyMotion, domAnimation, AnimatePresence } from "framer-motion";
 
 const urlEndpoint = process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT;
 const publicKey = process.env.NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY;
@@ -29,15 +30,19 @@ export default function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ImageKitProvider
-        {...({
-          publicKey,
-          urlEndpoint,
-          authenticator,
-        } as any)}
-      >
-        {children}
-      </ImageKitProvider>
+      <AnimatePresence>
+        <LazyMotion features={domAnimation}>
+          <ImageKitProvider
+            {...({
+              publicKey,
+              urlEndpoint,
+              authenticator,
+            } as any)}
+          >
+            {children}
+          </ImageKitProvider>
+        </LazyMotion>
+      </AnimatePresence>
     </QueryClientProvider>
   );
 }

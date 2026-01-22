@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
@@ -129,7 +129,7 @@ export default function CategoryGrid() {
               idx === 0 ? "md:col-span-2 md:row-span-2" : "md:col-span-1 md:row-span-1"
               }`}
           >
-            <motion.div
+            <m.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ delay: idx * 0.1 }}
@@ -161,7 +161,7 @@ export default function CategoryGrid() {
                   <ArrowUpRight className="h-5 w-5" />
                 </div>
               </div>
-            </motion.div>
+            </m.div>
           </Link>
         ))}
 
