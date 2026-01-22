@@ -7,6 +7,7 @@ import { ArrowUpRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import api from "@/lib/axios";
 import { Skeleton } from "@/components/ui/skeleton";
+import imageKitLoader from "@/lib/imagekit-loader";
 
 interface CategoryData {
   id: string;
@@ -140,6 +141,8 @@ export default function CategoryGrid() {
                 src={cat.image}
                 alt={cat.title}
                 fill
+                loader={imageKitLoader}
+                sizes={idx === 0 ? "(max-width: 768px) 100vw, 66vw" : "(max-width: 768px) 100vw, 33vw"}
                 className="object-cover transition-transform duration-700 group-hover:scale-105"
               />
 

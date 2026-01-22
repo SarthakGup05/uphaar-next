@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { useCartStore } from "@/lib/store/cart-store"; // Optional: if you want the button to work immediately
 import { useActiveCoupons, getBestCouponForProduct } from "@/lib/hooks/use-coupons";
 import { Loader2 } from "lucide-react";
+import imageKitLoader from "@/lib/imagekit-loader";
 
 interface ProductProps {
   title: string;
@@ -50,6 +51,8 @@ export default function ProductCard({ title, category, price, image, slug, id }:
             src={image}
             alt={title}
             fill
+            loader={imageKitLoader}
+            sizes="(max-width: 768px) 50vw, 25vw"
             className="object-cover transition-transform duration-500 group-hover:scale-105"
           />
 

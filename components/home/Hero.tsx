@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import api from "@/lib/axios";
 import { HeroSkeleton } from "@/components/skeletons/public-skeletons";
+import imageKitLoader from "@/lib/imagekit-loader";
 
 // Interface must match DB schema + UI needs
 interface Slide {
@@ -142,8 +143,11 @@ export default function Hero() {
                 src={currentSlide.image}
                 alt={currentSlide.title}
                 fill
+                loader={imageKitLoader}
+                sizes="100vw"
                 className="object-cover"
                 priority
+                fetchPriority="high"
               />
             </motion.div>
             {/* Premium Gradient Overlay */}
