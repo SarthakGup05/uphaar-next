@@ -48,31 +48,10 @@ const textVariants: Variants = {
   },
 };
 
-export default function Hero() {
-  const [slides, setSlides] = useState<Slide[]>([]);
-  const [loading, setLoading] = useState(true);
+export default function Hero({ initialSlides = [] }: { initialSlides?: Slide[] }) {
+  const [slides, setSlides] = useState<Slide[]>(initialSlides);
+  const [loading, setLoading] = useState(false);
   const [[page, direction], setPage] = useState([0, 0]);
-
-  // Fetch Slides
-  useEffect(() => {
-    const fetchSlides = async () => {
-      try {
-        const { data } = await api.get("/hero");
-        if (data.length > 0) {
-          setSlides(data);
-        } else {
-          // Fallback if no slides exist
-          setSlides([]);
-        }
-      } catch (error) {
-        console.error("Failed to fetch hero slides:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchSlides();
-  }, []);
 
   const slideIndex = slides.length > 0 ? Math.abs(page % slides.length) : 0;
   const currentSlide = slides[slideIndex];
@@ -95,12 +74,7 @@ export default function Hero() {
     return Math.abs(offset) * velocity;
   };
 
-  if (loading) {
-    return <HeroSkeleton />;
-  }
-
   if (slides.length === 0) {
-    // Return null or a default static hero if no slides are set up yet
     return null;
   }
 
