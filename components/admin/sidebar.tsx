@@ -14,7 +14,8 @@ import {
     ChevronLeft,
     ChevronRight,
     Search,
-    Images
+    Images,
+    TicketPercent
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -51,7 +52,13 @@ export function AdminSidebar({ className }: SidebarProps) {
             href: "/admin/hero",
             active: pathname.startsWith("/admin/hero"),
         },
-        
+        {
+            label: "Coupons",
+            icon: TicketPercent,
+            href: "/admin/coupons",
+            active: pathname.startsWith("/admin/coupons"),
+        },
+
     ];
 
     const SidebarContent = () => (

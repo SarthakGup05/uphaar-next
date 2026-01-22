@@ -17,8 +17,35 @@ const lato = Lato({
 });
 
 export const metadata: Metadata = {
-  title: "Uphaar by Niharika | Handcrafted Aesthetic Goods",
-  description: "Handcrafted aesthetic goods.",
+  title: {
+    default: "Uphaar by Niharika | Handcrafted Resin Art & Aesthetic Gifts",
+    template: "%s | Uphaar by Niharika",
+  },
+  description: "Discover exclusive handcrafted resin art, luxury soy candles, concrete homeware, and curated gift hampers. Shop unique, aesthetic gifts for birthdays, weddings, and corporate events.",
+  keywords: [
+    "Resin Art",
+    "Handmade Gifts",
+    "Luxury Soy Candles",
+    "Concrete Decor",
+    "Gift Hampers India",
+    "Personalized Gifts",
+    "Corporate Gifting",
+    "Aesthetic Home Decor",
+    "Resin Clocks",
+    "Wedding Favors"
+  ],
+  openGraph: {
+    type: "website",
+    locale: "en_IN",
+    siteName: "Uphaar by Niharika",
+    title: "Uphaar by Niharika | Handcrafted Resin Art & Aesthetic Gifts",
+    description: "Discover exclusive handcrafted resin art, luxury soy candles, concrete homeware, and curated gift hampers.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Uphaar by Niharika | Handcrafted Resin Art & Aesthetic Gifts",
+    description: "Discover exclusive handcrafted resin art, luxury soy candles, concrete homeware, and curated gift hampers.",
+  },
 };
 
 export default function RootLayout({

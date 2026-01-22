@@ -59,6 +59,7 @@ export default function FeaturedCollection() {
                 price={Number(product.price)}
                 image={product.image}
                 slug={product.slug}
+                id={product.id}
               />
             ))}
           </div>

@@ -6,6 +6,8 @@ import { Plus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useCartStore } from "@/lib/store/cart-store"; // Optional: if you want the button to work immediately
+import { useActiveCoupons, getBestCouponForProduct } from "@/lib/hooks/use-coupons";
+import { Loader2 } from "lucide-react";
 
 interface ProductProps {
   title: string;
@@ -13,10 +15,14 @@ interface ProductProps {
   price: number;
   image: string;
   slug: string; // 2. Added slug prop
+  id: number; // Added numeric ID for coupon targeting
 }
 
-export default function ProductCard({ title, category, price, image, slug }: ProductProps) {
+export default function ProductCard({ title, category, price, image, slug, id }: ProductProps) {
   const addItem = useCartStore((state) => state.addItem);
+  const { data: coupons, isLoading } = useActiveCoupons();
+
+  const { bestCoupon, savings } = getBestCouponForProduct(coupons, price, id);
 
   const handleQuickAdd = (e: React.MouseEvent) => {
     e.preventDefault(); // Prevents navigation to the product page
@@ -56,10 +62,17 @@ export default function ProductCard({ title, category, price, image, slug }: Pro
             <Plus className="h-5 w-5" />
           </Button>
 
-          {/* Category Badge */}
           <Badge variant="secondary" className="absolute left-3 top-3 bg-stone-900/90 text-white text-xs backdrop-blur-md hover:bg-black">
             {category}
           </Badge>
+
+          {bestCoupon && (
+            <Badge className="absolute left-3 top-10 bg-red-600 text-white text-xs z-10 animate-in fade-in zoom-in">
+              {bestCoupon.discountType === "PERCENTAGE"
+                ? `${bestCoupon.discountValue}% OFF`
+                : `SAVE ₹${bestCoupon.discountValue}`}
+            </Badge>
+          )}
         </div>
 
         {/* Product Details */}

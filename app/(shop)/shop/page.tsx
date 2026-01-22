@@ -187,6 +187,7 @@ function ShopContent() {
                 price={Number(product.price)}
                 image={product.image}
                 slug={product.slug}
+                id={product.id}
               />
             </motion.div>
           ))}

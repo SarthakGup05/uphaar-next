@@ -3,10 +3,10 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
-import { Minus, Plus, ShoppingBag, Truck, ShieldCheck, Star, Share2, ArrowLeft } from "lucide-react";
+import { Minus, Plus, ShoppingBag, Star, Share2, Heart, ArrowLeft, Check, Truck, ShieldCheck, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import {
     Accordion,
     AccordionContent,
@@ -14,9 +14,14 @@ import {
     AccordionTrigger,
 } from "@/components/ui/accordion";
 import { useCartStore } from "@/lib/store/cart-store";
-// import { toast } from "sonner"; // Optional: For nice notifications
+import { useActiveCoupons } from "@/lib/hooks/use-coupons";
+import { cn } from "@/lib/utils";
+import imageKitLoader from "@/lib/imagekit-loader";
 
-// Define type based on DB schema + UI needs
+// Minimalist Standard Layout
+// Left: Thumbnail Gallery (Desktop) / Carousel (Mobile)
+// Right: Sticky Details Content
+
 interface Product {
     id: number;
     title: string;
@@ -38,6 +43,11 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
     const [quantity, setQuantity] = useState(1);
     const [activeImage, setActiveImage] = useState(0);
     const addItem = useCartStore((state) => state.addItem);
+    const { data: coupons } = useActiveCoupons();
+
+    const applicableCoupons = coupons?.filter(c =>
+        c.productIds.length === 0 || c.productIds.includes(product.id)
+    ) || [];
 
     const handleAddToCart = () => {
         addItem({
@@ -52,172 +62,221 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
     };
 
     return (
-        <div className="min-h-screen bg-background pb-32 pt-4 md:pt-10">
-            <div className="container mx-auto px-4">
-
-                {/* Breadcrumb / Back Button */}
-                <div className="mb-6 flex items-center justify-between">
-                    <Link href="/" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors">
-                        <ArrowLeft className="h-4 w-4" /> Back to Shop
+        <div className="min-h-screen bg-white text-stone-950 pb-20">
+            {/* Breadcrumb Header */}
+            <div className="border-b border-stone-100 bg-white">
+                <div className="container mx-auto px-4 h-14 flex items-center text-sm text-stone-500">
+                    <Link href="/shop" className="hover:text-stone-900 transition-colors flex items-center gap-1">
+                        <ArrowLeft className="h-4 w-4" /> Shop
                     </Link>
-                    <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary">
-                        <Share2 className="h-4 w-4" />
-                    </Button>
+                    <span className="mx-2 text-stone-300">/</span>
+                    <span className="text-stone-900 font-medium truncate">{product.title}</span>
                 </div>
+            </div>
 
-                <div className="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:gap-20">
+            <div className="container mx-auto px-4 py-8 md:py-12">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 xl:gap-20">
 
-                    {/* LEFT: Immersive Gallery */}
-                    <div className="space-y-4">
-                        <div className="relative aspect-[4/5] w-full overflow-hidden rounded-2xl border border-border bg-stone-100 shadow-sm">
-                            <AnimatePresence mode="wait">
-                                <motion.div
-                                    key={activeImage}
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    exit={{ opacity: 0 }}
-                                    transition={{ duration: 0.4 }}
-                                    className="absolute inset-0 h-full w-full"
-                                >
-                                    <Image
-                                        src={product.images[activeImage]}
-                                        alt={product.title}
-                                        fill
-                                        className="object-cover"
-                                        priority
-                                    />
-                                </motion.div>
-                            </AnimatePresence>
-
-                            <div className="absolute left-4 top-4">
-                                <Badge className="bg-stone-900/90 text-white backdrop-blur-md hover:bg-black">Handmade</Badge>
+                    {/* LEFT COLUMN - GALLERY */}
+                    <div className="space-y-6">
+                        {/* Main Image */}
+                        <div className="relative aspect-square w-full overflow-hidden bg-stone-50 rounded-lg border border-stone-100">
+                            <Image
+                                src={product.images[activeImage]}
+                                alt={product.title}
+                                fill
+                                loader={imageKitLoader}
+                                sizes="(max-width: 768px) 100vw, 50vw"
+                                className="object-cover object-center"
+                                priority
+                            />
+                            {/* Tags */}
+                            <div className="absolute left-4 top-4 flex flex-col gap-2">
+                                {product.stock < 5 && (
+                                    <Badge variant="destructive" className="rounded-sm px-2.5 py-1 text-xs font-bold uppercase tracking-wider shadow-sm">
+                                        Low Stock
+                                    </Badge>
+                                )}
+                                <Badge variant="secondary" className="w-fit rounded-sm bg-white/90 px-2.5 py-1 text-xs font-bold uppercase tracking-wider text-stone-900 shadow-sm backdrop-blur-sm">
+                                    {product.category}
+                                </Badge>
                             </div>
                         </div>
 
-                        {/* Thumbnails */}
+                        {/* Thumbnails (Grid) */}
                         {product.images.length > 1 && (
-                            <div className="flex gap-3 overflow-x-auto pb-2">
+                            <div className="grid grid-cols-5 gap-3">
                                 {product.images.map((img, idx) => (
                                     <button
                                         key={idx}
                                         onClick={() => setActiveImage(idx)}
-                                        className={`relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg border-2 transition-all ${activeImage === idx ? "border-primary opacity-100 ring-2 ring-primary ring-offset-2" : "border-transparent opacity-60 hover:opacity-100"
-                                            }`}
+                                        className={cn(
+                                            "relative aspect-square overflow-hidden rounded-md border bg-stone-50 transition-all",
+                                            activeImage === idx
+                                                ? "border-stone-900 ring-1 ring-stone-900"
+                                                : "border-transparent opacity-70 hover:opacity-100 hover:border-stone-300"
+                                        )}
                                     >
-                                        <Image src={img} alt="Thumbnail" fill className="object-cover" />
+                                        <Image
+                                            src={img}
+                                            alt={`View ${idx + 1}`}
+                                            fill
+                                            loader={imageKitLoader}
+                                            sizes="(max-width: 768px) 20vw, 10vw"
+                                            className="object-cover"
+                                        />
                                     </button>
                                 ))}
                             </div>
                         )}
                     </div>
 
-                    {/* RIGHT: Product Details */}
-                    <div className="flex flex-col pt-2">
-                        <div className="mb-2 flex items-center gap-2">
-                            <Badge className="bg-stone-900 text-white hover:bg-black">{product.category}</Badge>
-                            {product.stock < 5 && <span className="text-xs font-medium text-red-500">Only {product.stock} left!</span>}
-                        </div>
+                    {/* RIGHT COLUMN - DETAILS (Sticky) */}
+                    <div className="lg:sticky lg:top-24 h-fit space-y-8">
 
-                        <h1 className="font-serif text-4xl font-bold text-foreground md:text-5xl leading-tight">{product.title}</h1>
+                        {/* Title & Price Header */}
+                        <div className="space-y-4">
+                            <h1 className="text-3xl font-bold tracking-tight text-stone-900 sm:text-4xl font-sans">
+                                {product.title}
+                            </h1>
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-baseline gap-4">
+                                    <span className="text-3xl font-bold text-stone-900">
+                                        ₹{product.price.toLocaleString()}
+                                    </span>
+                                    {/* Placeholder for MRP if we had it */}
+                                    {/* <span className="text-lg text-stone-400 line-through">₹{(product.price * 1.2).toLocaleString()}</span> */}
+                                </div>
 
-                        <div className="mt-4 flex items-center gap-4 border-b border-border pb-6">
-                            <span className="text-3xl font-medium text-primary">₹{product.price.toLocaleString()}</span>
-                            <div className="flex items-center gap-1 text-sm text-yellow-600 bg-yellow-50 px-2 py-1 rounded-md">
-                                <Star className="h-3.5 w-3.5 fill-current" />
-                                <span className="font-bold">{product.rating}</span>
-                                <span className="text-muted-foreground ml-1">({product.reviews} reviews)</span>
+                                {/* Rating Badge */}
+                                {product.reviews > 0 && (
+                                    <div className="flex items-center gap-1 rounded bg-stone-100 px-2 py-1 text-sm font-medium text-stone-900">
+                                        <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
+                                        <span>{product.rating}</span>
+                                        <span className="text-stone-400 mx-1">|</span>
+                                        <span className="text-stone-500 underline decoration-stone-300 underline-offset-4">
+                                            {product.reviews} Reviews
+                                        </span>
+                                    </div>
+                                )}
                             </div>
                         </div>
 
-                        <div className="mt-8 space-y-8">
-                            <p className="text-lg leading-relaxed text-muted-foreground">
+                        <Separator />
+
+                        {/* Available Offers */}
+                        {applicableCoupons.length > 0 && (
+                            <div className="space-y-3">
+                                <h4 className="font-semibold text-stone-900 flex items-center gap-2 text-sm">
+                                    <Badge className="h-5 w-5 p-0 flex items-center justify-center rounded-full bg-green-600 text-white">%</Badge>
+                                    Available Offers
+                                </h4>
+                                <ul className="space-y-2.5">
+                                    {applicableCoupons.map((coupon) => (
+                                        <li key={coupon.id} className="flex items-start gap-3 text-sm text-stone-600 group">
+                                            <span className="mt-1 h-1.5 w-1.5 rounded-full bg-stone-300 group-hover:bg-green-500 transition-colors" />
+                                            <span>
+                                                Get
+                                                <span className="font-bold text-green-700 mx-1">
+                                                    {coupon.discountType === "PERCENTAGE"
+                                                        ? `${coupon.discountValue}% OFF`
+                                                        : `₹${coupon.discountValue} OFF`}
+                                                </span>
+                                                upto ₹{coupon.maxDiscount || coupon.discountValue} on orders above ₹{coupon.minOrderValue || '0'}.
+                                                Code: <span className="font-mono font-medium text-stone-800 bg-stone-100 px-1.5 py-0.5 rounded border border-stone-200">{coupon.code}</span>
+                                            </span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
+
+                        {/* Description */}
+                        <div className="space-y-4">
+                            {/* Selector for size/variant would go here */}
+                            <p className="text-base leading-relaxed text-stone-600">
                                 {product.description}
                             </p>
-
-                            {/* Action Area (Desktop) */}
-                            <div className="hidden md:flex flex-col gap-4 p-6 bg-stone-50 rounded-xl border border-border">
-                                <div className="flex items-center justify-between">
-                                    <span className="font-medium text-foreground">Quantity</span>
-                                    <div className="flex h-10 w-32 items-center justify-between rounded-full border border-border bg-white px-2">
-                                        <Button variant="ghost" size="icon" onClick={() => setQuantity(q => Math.max(1, q - 1))} className="h-8 w-8 rounded-full hover:bg-stone-100">
-                                            <Minus className="h-3 w-3" />
-                                        </Button>
-                                        <span className="text-sm font-medium">{quantity}</span>
-                                        <Button variant="ghost" size="icon" onClick={() => setQuantity(q => Math.min(product.stock, q + 1))} className="h-8 w-8 rounded-full hover:bg-stone-100">
-                                            <Plus className="h-3 w-3" />
-                                        </Button>
-                                    </div>
-                                </div>
-
-                                <Button size="lg" onClick={handleAddToCart} className="w-full h-12 rounded-lg gap-2 text-base shadow-lg shadow-primary/20 transition-transform active:scale-[0.98]">
-                                    <ShoppingBag className="h-5 w-5" /> Add to Cart - ₹{(product.price * quantity).toLocaleString()}
-                                </Button>
-                            </div>
-
-                            {/* Trust Badges */}
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="flex items-center gap-3 rounded-xl border border-border p-4 bg-background/50">
-                                    <div className="h-10 w-10 rounded-full bg-secondary/10 flex items-center justify-center text-secondary">
-                                        <Truck className="h-5 w-5" />
-                                    </div>
-                                    <div className="text-xs">
-                                        <span className="block font-bold text-foreground text-sm">Fast Shipping</span>
-                                        <span className="text-muted-foreground">Dispatched in 24h</span>
-                                    </div>
-                                </div>
-                                <div className="flex items-center gap-3 rounded-xl border border-border p-4 bg-background/50">
-                                    <div className="h-10 w-10 rounded-full bg-green-500/10 flex items-center justify-center text-green-600">
-                                        <ShieldCheck className="h-5 w-5" />
-                                    </div>
-                                    <div className="text-xs">
-                                        <span className="block font-bold text-foreground text-sm">Secure Checkout</span>
-                                        <span className="text-muted-foreground">UPI & Cards Accepted</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Accordions */}
-                            <Accordion type="single" collapsible className="w-full border-t border-border">
-                                <AccordionItem value="item-1" className="border-b border-border">
-                                    <AccordionTrigger className="text-foreground hover:no-underline">Care Instructions</AccordionTrigger>
-                                    <AccordionContent className="text-muted-foreground leading-relaxed">
-                                        Do not soak in water. Wipe clean with a damp cloth. Keep away from direct sunlight to prevent yellowing over time. Not dishwasher safe.
-                                    </AccordionContent>
-                                </AccordionItem>
-                                <AccordionItem value="item-2" className="border-b border-border">
-                                    <AccordionTrigger className="text-foreground hover:no-underline">Shipping & Returns</AccordionTrigger>
-                                    <AccordionContent className="text-muted-foreground leading-relaxed">
-                                        We ship all over India via BlueDart/Delhivery. Delivery takes 5-7 business days. Returns accepted only for damaged products (video proof required).
-                                    </AccordionContent>
-                                </AccordionItem>
-                            </Accordion>
                         </div>
+
+                        {/* Actions */}
+                        <div className="space-y-4 pt-4">
+                            <div className="flex items-center gap-4">
+                                <div className="flex h-12 w-32 items-center justify-between rounded-md border border-stone-200 bg-white px-3 shadow-sm">
+                                    <button
+                                        onClick={() => setQuantity(q => Math.max(1, q - 1))}
+                                        className="text-stone-400 hover:text-stone-900 disabled:opacity-50"
+                                        disabled={quantity <= 1}
+                                    >
+                                        <Minus className="h-4 w-4" />
+                                    </button>
+                                    <span className="font-semibold text-stone-900">{quantity}</span>
+                                    <button
+                                        onClick={() => setQuantity(q => Math.min(product.stock, q + 1))}
+                                        className="text-stone-400 hover:text-stone-900 disabled:opacity-50"
+                                        disabled={quantity >= product.stock}
+                                    >
+                                        <Plus className="h-4 w-4" />
+                                    </button>
+                                </div>
+                                <div className="flex gap-2">
+                                    <Button variant="outline" size="icon" className="h-12 w-12 rounded-md border-stone-200">
+                                        <Heart className="h-5 w-5 text-stone-500" />
+                                    </Button>
+                                    <Button variant="outline" size="icon" className="h-12 w-12 rounded-md border-stone-200">
+                                        <Share2 className="h-5 w-5 text-stone-500" />
+                                    </Button>
+                                </div>
+                            </div>
+
+                            <Button
+                                size="lg"
+                                onClick={handleAddToCart}
+                                className="w-full h-14 rounded-md text-base font-bold tracking-wide shadow-none hover:translate-y-0 active:scale-[0.99] transition-all"
+                            >
+                                <ShoppingBag className="mr-2 h-5 w-5" /> ADD TO CART — ₹{(product.price * quantity).toLocaleString()}
+                            </Button>
+                        </div>
+
+                        {/* Information Sections */}
+                        <Accordion type="single" collapsible className="w-full border-t border-stone-200">
+                            <AccordionItem value="details" className="border-b border-stone-200">
+                                <AccordionTrigger className="text-stone-900 font-medium hover:no-underline">
+                                    Product Details
+                                </AccordionTrigger>
+                                <AccordionContent className="text-stone-500">
+                                    <ul className="list-disc pl-5 space-y-1">
+                                        <li>Premium quality materials</li>
+                                        <li>Hand-finished details</li>
+                                        <li>Designed in-house</li>
+                                        <li>Eco-friendly packaging</li>
+                                    </ul>
+                                </AccordionContent>
+                            </AccordionItem>
+                            <AccordionItem value="shipping" className="border-b border-stone-200">
+                                <AccordionTrigger className="text-stone-900 font-medium hover:no-underline">
+                                    Shipping & Returns
+                                </AccordionTrigger>
+                                <AccordionContent className="text-stone-500">
+                                    Free standard shipping on all orders above ₹999. Orders below ₹999 will be charged a flat rate of ₹49. Returns are accepted within 7 days of delivery.
+                                </AccordionContent>
+                            </AccordionItem>
+                        </Accordion>
+
                     </div>
                 </div>
             </div>
 
-            {/* MOBILE STICKY BOTTOM BAR */}
-            <div className="fixed bottom-0 left-0 right-0 z-50 flex items-center justify-between border-t border-border bg-background p-4 shadow-2xl md:hidden">
-                <div className="flex flex-col">
-                    <span className="text-xs text-muted-foreground">Total Price</span>
-                    <span className="text-lg font-bold text-primary">₹{(product.price * quantity).toLocaleString()}</span>
-                </div>
-                <div className="flex gap-3">
-                    <div className="flex h-12 items-center rounded-lg border border-border bg-stone-50 px-2">
-                        <Button variant="ghost" size="icon" onClick={() => setQuantity(q => Math.max(1, q - 1))} className="h-8 w-8">
-                            <Minus className="h-4 w-4" />
-                        </Button>
-                        <span className="w-8 text-center font-medium">{quantity}</span>
-                        <Button variant="ghost" size="icon" onClick={() => setQuantity(q => Math.min(product.stock, q + 1))} className="h-8 w-8">
-                            <Plus className="h-4 w-4" />
-                        </Button>
-                    </div>
-                    <Button onClick={handleAddToCart} className="h-12 px-6 rounded-lg shadow-lg shadow-primary/25">
-                        Add to Cart
-                    </Button>
-                </div>
+            {/* Sticky Action Bar (Mobile Only) */}
+            <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-stone-200 bg-white p-4 lg:hidden shadow-[0_-4px_10px_rgba(0,0,0,0.05)]">
+                <Button
+                    size="lg"
+                    onClick={handleAddToCart}
+                    className="w-full h-12 rounded-md font-bold shadow-none"
+                >
+                    Add to Cart — ₹{(product.price * quantity).toLocaleString()}
+                </Button>
             </div>
-
         </div>
     );
 }

@@ -64,3 +64,32 @@ export const heroSlides = pgTable("hero_slides", {
   order: integer("order").default(0),
   createdAt: timestamp("created_at").defaultNow(),
 });
+
+// ----------------------------------------------------------------------
+// 4. COUPONS
+// ----------------------------------------------------------------------
+
+export const coupons = pgTable("coupons", {
+  id: serial("id").primaryKey(),
+  code: text("code").notNull().unique(), // e.g., "SAVE10"
+  discountType: text("discount_type").notNull(), // 'PERCENTAGE' or 'FIXED'
+  discountValue: numeric("discount_value", { precision: 10, scale: 2 }).notNull(),
+  minOrderValue: numeric("min_order_value", { precision: 10, scale: 2 }).default("0"),
+  maxDiscount: numeric("max_discount", { precision: 10, scale: 2 }), // Max discount for percentage coupons
+  validFrom: timestamp("valid_from"),
+  validUntil: timestamp("valid_until"),
+  isActive: boolean("is_active").default(true),
+  usageLimit: integer("usage_limit"), // Total times this coupon can be used
+  usedCount: integer("used_count").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const couponProducts = pgTable("coupon_products", {
+  id: serial("id").primaryKey(),
+  couponId: integer("coupon_id")
+    .notNull()
+    .references(() => coupons.id, { onDelete: "cascade" }),
+  productId: integer("product_id")
+    .notNull()
+    .references(() => products.id, { onDelete: "cascade" }),
+});

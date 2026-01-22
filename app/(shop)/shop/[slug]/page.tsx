@@ -3,6 +3,30 @@ import { db } from "@/lib/db";
 import { products } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
+import { Metadata } from 'next';
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+    const { slug } = await params;
+    const result = await db.select().from(products).where(eq(products.slug, slug)).limit(1);
+    const product = result[0];
+
+    if (!product) {
+        return {
+            title: 'Product Not Found',
+        };
+    }
+
+    return {
+        title: `${product.title} | Uphaar`,
+        description: product.description.substring(0, 160),
+        openGraph: {
+            title: product.title,
+            description: product.description.substring(0, 160),
+            images: [product.image],
+            type: 'website',
+        },
+    };
+}
 
 export default async function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;
@@ -38,5 +62,29 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         stock: product.stock,
     };
 
-    return <ProductDetails product={transformedProduct} />;
+    const jsonLd = {
+        '@context': 'https://schema.org',
+        '@type': 'Product',
+        name: product.title,
+        image: product.image,
+        description: product.description,
+        sku: product.id.toString(),
+        category: product.category,
+        offers: {
+            '@type': 'Offer',
+            priceCurrency: 'INR',
+            price: Number(product.price),
+            availability: product.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+        },
+    };
+
+    return (
+        <>
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+            />
+            <ProductDetails product={transformedProduct} />
+        </>
+    );
 }
