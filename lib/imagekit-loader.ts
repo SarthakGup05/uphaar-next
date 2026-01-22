@@ -1,9 +1,8 @@
 export default function imageKitLoader({ src, width, quality }: { src: string; width: number; quality?: number }) {
   if (src[0] === "/") src = src.slice(1);
   const params = [`w-${width}`];
-  if (quality) {
-    params.push(`q-${quality}`);
-  }
+  // Default quality to 80 if not specified to save bandwidth
+  params.push(`q-${quality || 80}`);
   const paramsString = params.join(",");
   const urlEndpoint = process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT || "https://ik.imagekit.io/uphaar"; 
 

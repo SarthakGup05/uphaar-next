@@ -8,12 +8,14 @@ import { Toaster as HotToaster } from "react-hot-toast";
 const playfair = Playfair_Display({
   subsets: ["latin"],
   variable: "--font-playfair",
+  display: "swap",
 });
 
 const lato = Lato({
   weight: ["300", "400", "700"],
   subsets: ["latin"],
   variable: "--font-lato",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
