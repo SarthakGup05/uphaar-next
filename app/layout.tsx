@@ -19,6 +19,10 @@ const lato = Lato({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://www.uphaarbyniharika.in'),
+  alternates: {
+    canonical: './',
+  },
   title: {
     default: "Uphaar by Niharika | Handcrafted Resin Art & Aesthetic Gifts",
     template: "%s | Uphaar by Niharika",
@@ -42,6 +46,15 @@ export const metadata: Metadata = {
     siteName: "Uphaar by Niharika",
     title: "Uphaar by Niharika | Handcrafted Resin Art & Aesthetic Gifts",
     description: "Discover exclusive handcrafted resin art, luxury soy candles, concrete homeware, and curated gift hampers.",
+    url: './',
+    images: [
+      {
+        url: '/logo.jpeg',
+        width: 800,
+        height: 600,
+        alt: 'Uphaar by Niharika',
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
