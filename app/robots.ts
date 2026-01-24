@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: "/",
       disallow: ["/admin/", "/api/"], // Disallow admin and api routes
     },
-    sitemap: "https://www.uphaarbyniharika.in/sitemap.xml",
+    sitemap: `${process.env.NEXT_PUBLIC_URL}/sitemap.xml`,
   };
 }

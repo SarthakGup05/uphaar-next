@@ -4,7 +4,7 @@ import { products } from "@/lib/db/schema";
 import { desc } from "drizzle-orm";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = "https://www.uphaarbyniharika.in";
+  const baseUrl = process.env.NEXT_PUBLIC_URL || "http://localhost:3000";
 
   // 1. Fetch all products to generate dynamic URLs
   // Using direct DB access for build-time/ISR performance

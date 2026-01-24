@@ -19,7 +19,7 @@ const lato = Lato({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://www.uphaarbyniharika.in'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'),
   alternates: {
     canonical: './',
   },
