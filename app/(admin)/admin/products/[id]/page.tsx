@@ -19,6 +19,7 @@ import { useRouter } from "next/navigation";
 import { use, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { ImageUpload } from "@/components/admin/image-upload";
+import { MultiImageUpload } from "@/components/admin/multi-image-upload";
 import { toast } from "sonner";
 import { AdminFormSkeleton } from "@/components/skeletons/admin-skeletons";
 import { useQuery } from "@tanstack/react-query";
@@ -53,6 +54,7 @@ export default function EditProductPage({ params }: PageProps) {
             category: "Resin",
             imageUrl: "",
             heroImageUrl: "",
+            images: [],
         },
     });
 
@@ -68,6 +70,7 @@ export default function EditProductPage({ params }: PageProps) {
                 stock: Number(product.stock),
                 imageUrl: product.image,
                 heroImageUrl: product.heroImage || "",
+                images: product.images || [],
             });
         }
     }, [product, form]);
@@ -83,6 +86,7 @@ export default function EditProductPage({ params }: PageProps) {
                     ...values,
                     image: values.imageUrl, // Map imageUrl to image for DB
                     heroImage: values.heroImageUrl || null,
+                    images: values.images,
                 }),
             });
 
@@ -299,6 +303,27 @@ export default function EditProductPage({ params }: PageProps) {
                                 )}
                             />
                         </div>
+                    </div>
+
+                    <div className="space-y-2">
+                        <FormField
+                            control={form.control}
+                            name="images"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Gallery Images (Optional)</FormLabel>
+                                    <FormControl>
+                                        <MultiImageUpload
+                                            value={field.value || []}
+                                            onChange={field.onChange}
+                                            folder="/products/gallery"
+                                        />
+                                    </FormControl>
+                                    <FormDescription>Additional images for the product gallery. Add as many as you like.</FormDescription>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
                     </div>
 
                     {/* Actions */}

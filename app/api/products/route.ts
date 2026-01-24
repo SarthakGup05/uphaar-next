@@ -18,14 +18,21 @@ export async function GET(request: Request) {
 
     if (category && category !== "All") {
       // @ts-ignore - Drizzle dynamic query type workaround
-      query = db.select().from(products).where(eq(products.category, category)).orderBy(desc(products.createdAt));
+      query = db
+        .select()
+        .from(products)
+        .where(eq(products.category, category))
+        .orderBy(desc(products.createdAt));
     }
 
     const allProducts = await query;
     return NextResponse.json(allProducts);
   } catch (error) {
     console.error("Fetch Products Error:", error);
-    return NextResponse.json({ error: "Failed to fetch products" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to fetch products" },
+      { status: 500 },
+    );
   }
 }
 
@@ -38,22 +45,29 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    
+
     // Insert into DB
-    const [newProduct] = await db.insert(products).values({
-      title: body.title,
-      slug: body.slug,
-      description: body.description,
-      price: body.price.toString(),
-      stock: Number(body.stock),
-      category: body.category,
-      image: body.image,
-      heroImage: body.heroImage,
-    }).returning();
+    const [newProduct] = await db
+      .insert(products)
+      .values({
+        title: body.title,
+        slug: body.slug,
+        description: body.description,
+        price: body.price.toString(),
+        stock: Number(body.stock),
+        category: body.category,
+        image: body.image,
+        heroImage: body.heroImage,
+        images: body.images,
+      })
+      .returning();
 
     return NextResponse.json(newProduct, { status: 201 });
   } catch (error) {
     console.error("Create Product Error:", error);
-    return NextResponse.json({ error: "Failed to create product" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to create product" },
+      { status: 500 },
+    );
   }
 }

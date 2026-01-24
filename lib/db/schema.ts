@@ -1,4 +1,12 @@
-import { pgTable, serial, text, integer, timestamp, numeric, boolean } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  serial,
+  text,
+  integer,
+  timestamp,
+  numeric,
+  boolean,
+} from "drizzle-orm/pg-core";
 
 // ----------------------------------------------------------------------
 // 1. STORE CONTENT
@@ -14,6 +22,7 @@ export const products = pgTable("products", {
   stock: integer("stock").notNull().default(0),
   image: text("image").notNull(),
   heroImage: text("hero_image"), // Optional hero/banner image
+  images: text("images").array(), // Optional array of additional image URLs
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -73,8 +82,14 @@ export const coupons = pgTable("coupons", {
   id: serial("id").primaryKey(),
   code: text("code").notNull().unique(), // e.g., "SAVE10"
   discountType: text("discount_type").notNull(), // 'PERCENTAGE' or 'FIXED'
-  discountValue: numeric("discount_value", { precision: 10, scale: 2 }).notNull(),
-  minOrderValue: numeric("min_order_value", { precision: 10, scale: 2 }).default("0"),
+  discountValue: numeric("discount_value", {
+    precision: 10,
+    scale: 2,
+  }).notNull(),
+  minOrderValue: numeric("min_order_value", {
+    precision: 10,
+    scale: 2,
+  }).default("0"),
   maxDiscount: numeric("max_discount", { precision: 10, scale: 2 }), // Max discount for percentage coupons
   validFrom: timestamp("valid_from"),
   validUntil: timestamp("valid_until"),

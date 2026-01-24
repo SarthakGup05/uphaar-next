@@ -50,7 +50,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         // Convert decimal string to number
         price: Number(product.price),
         // Create array from single image
-        images: [product.image],
+        images: [product.image, ...(product.images || [])].filter(Boolean),
         // Default values for missing fields
         rating: 4.5,
         reviews: 0,

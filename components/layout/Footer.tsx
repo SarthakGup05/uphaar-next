@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Instagram, Facebook, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -13,9 +14,13 @@ export default function Footer() {
 
           {/* Brand Column */}
           <div className="space-y-4">
-            <Link href="/" className="flex flex-col leading-none w-fit">
-              <span className="font-serif text-2xl font-bold text-primary">Uphaar</span>
-              <span className="font-serif text-xs italic text-secondary">by Niharika</span>
+            <Link href="/" className="block relative h-24 w-72 transition-opacity hover:opacity-90">
+              <Image
+                src="/logo.png"
+                alt="Uphaar by Niharika"
+                fill
+                className="object-contain object-left mix-blend-multiply"
+              />
             </Link>
             <p className="text-sm text-muted-foreground leading-relaxed max-w-xs">
               Handcrafted with love. We bring sustainable, artistic, and unique décor pieces to your modern home.

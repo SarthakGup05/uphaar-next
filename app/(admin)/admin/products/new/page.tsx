@@ -25,6 +25,7 @@ import { ArrowLeft, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ImageUpload } from "@/components/admin/image-upload";
+import { MultiImageUpload } from "@/components/admin/multi-image-upload";
 import { toast } from "sonner";
 import { productSchema, type ProductFormValues } from "@/lib/schemas";
 
@@ -42,6 +43,7 @@ export default function AddProductPage() {
             category: "Resin", // Default valid category
             imageUrl: "",
             heroImageUrl: "",
+            images: [],
         },
     });
 
@@ -55,6 +57,7 @@ export default function AddProductPage() {
                 body: JSON.stringify({
                     ...values,
                     image: values.imageUrl, // Map for API
+                    images: values.images,
                 }),
             });
 
@@ -282,10 +285,13 @@ export default function AddProductPage() {
                                 </Link>
                             </div>
                         </div>
+
+
                     </div>
+
 
                 </form>
             </Form>
-        </div>
+        </div >
     );
 }

@@ -5,11 +5,9 @@ export const productSchema = z.object({
     .string()
     .min(15, { message: "Title must be at least 15 characters long" })
     .max(100, { message: "Title cannot exceed 100 characters" }),
-  slug: z
-    .string()
-    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, {
-      message: "Slug must be lowercase alphanumeric with hyphens",
-    }),
+  slug: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, {
+    message: "Slug must be lowercase alphanumeric with hyphens",
+  }),
   description: z
     .string()
     .min(200, { message: "Description must be at least 200 characters long" })
@@ -26,6 +24,7 @@ export const productSchema = z.object({
   }),
   imageUrl: z.string().url({ message: "Product image is required" }),
   heroImageUrl: z.string().url().optional().or(z.literal("")),
+  images: z.array(z.string().url()).optional(),
 });
 
 export const heroSlideSchema = z.object({
