@@ -2,6 +2,7 @@ import Navbar from "@/components/layout/navbar";
 import Footer from "@/components/layout/Footer";
 import { FloatingSocials } from "@/components/layout/FloatingSocials";
 
+
 export default function ShopLayout({
     children,
 }: {
@@ -9,6 +10,7 @@ export default function ShopLayout({
 }) {
     return (
         <>
+          
             <Navbar />
             <FloatingSocials />
             <main className="min-h-screen">{children}</main>
