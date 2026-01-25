@@ -74,6 +74,14 @@ export default function RootLayout({
       <body
         className={`${playfair.variable} ${lato.variable} bg-background text-text antialiased overflow-x-hidden`}
       >
+        <noscript>
+          <iframe
+            src="https://www.googletagmanager.com/ns.html?id=GTM-KCCCSWW4"
+            height="0"
+            width="0"
+            style={{ display: "none", visibility: "hidden" }}
+          />
+        </noscript>
         <Providers>{children}</Providers>
         <Toaster />
         <HotToaster position="top-center" />
