@@ -11,10 +11,11 @@ import Image from "next/image";
 import { useCartStore } from "@/lib/store/cart-store";
 import api from "@/lib/axios";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 export function CartSheet() {
   // Access state and actions from the store
-  const { items, removeItem, total, subtotal, totalItems, applyCoupon, removeCoupon, coupon } = useCartStore();
+  const { items, removeItem, total, subtotal, shipping, totalItems, applyCoupon, removeCoupon, coupon } = useCartStore();
   const [couponCode, setCouponCode] = useState("");
   const [validatingCoupon, setValidatingCoupon] = useState(false);
 
@@ -211,6 +212,13 @@ export function CartSheet() {
                     <span>-₹{coupon.discountAmount.toLocaleString()}</span>
                   </div>
                 )}
+
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Shipping</span>
+                  <span className={cn("font-medium", shipping() === 0 ? "text-green-600" : "text-foreground")}>
+                    {shipping() === 0 ? "Free" : `₹${shipping()}`}
+                  </span>
+                </div>
 
                 <div className="flex items-center justify-between pt-2">
                   <span className="text-base font-medium text-foreground">Total</span>

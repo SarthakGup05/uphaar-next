@@ -130,11 +130,8 @@ export default function Hero({ initialSlides = [] }: { initialSlides?: Slide[] }
           </div>
 
           {/* Text Content */}
-          <div className={`absolute inset-0 flex items-center px-8 md:px-20 ${currentSlide.align === 'left' ? 'justify-start' :
-            currentSlide.align === 'right' ? 'justify-end' :
-              'justify-center text-center'
-            }`}>
-            <div className="max-w-3xl text-white pt-20">
+          <div className="absolute inset-0 flex items-center justify-center text-center px-4 md:px-20">
+            <div className="max-w-4xl text-white pt-10 md:pt-20 mx-auto">
               <m.div
                 key={`text-${page}`}
                 initial="hidden"
@@ -144,30 +141,26 @@ export default function Hero({ initialSlides = [] }: { initialSlides?: Slide[] }
                   visible: { transition: { staggerChildren: 0.15 } }
                 }}
               >
-                <m.div variants={textVariants} className="mb-4 flex items-center gap-3">
-                  <span className="h-px w-12 bg-accent/80"></span>
-                  <span className="text-sm font-semibold uppercase tracking-[0.2em] text-accent">
+                <m.div variants={textVariants} className="mb-4 md:mb-6 flex items-center justify-center gap-3">
+                  <span className="h-px w-8 md:w-12 bg-accent/80"></span>
+                  <span className="text-xs md:text-sm font-semibold uppercase tracking-[0.2em] text-accent">
                     Handcrafted Luxury
                   </span>
+                  <span className="h-px w-8 md:w-12 bg-accent/80"></span>
                 </m.div>
 
-                <m.h1 variants={textVariants} className="mb-6 font-serif text-6xl font-bold leading-tight md:text-8xl drop-shadow-lg">
+                <m.h1 variants={textVariants} className="mb-4 md:mb-6 font-serif text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-bold leading-tight drop-shadow-lg">
                   {currentSlide.title}
                 </m.h1>
 
-                <m.p variants={textVariants} className="mb-10 text-lg font-light leading-relaxed text-white/90 md:text-2xl md:max-w-2xl drop-shadow-sm">
+                <m.p variants={textVariants} className="mb-8 md:mb-10 text-base sm:text-lg md:text-2xl font-light leading-relaxed text-white/90 mx-auto max-w-lg md:max-w-2xl drop-shadow-sm">
                   {currentSlide.subtitle}
                 </m.p>
 
-                <m.div variants={textVariants} className="flex flex-wrap gap-4">
-                  <Button asChild size="lg" className="h-14 rounded-full bg-white px-8 text-base font-semibold text-black transition-all hover:bg-stone-200 hover:scale-105 active:scale-95">
-                    <Link href={currentSlide.cta.toLowerCase().includes("shop") ? "/shop" : "/about"}>
-                      Shop Collection
-                    </Link>
-                  </Button>
-                  <Button asChild variant="outline" size="lg" className="h-14 rounded-full border-white/30 bg-white/10 px-8 text-base font-semibold text-white backdrop-blur-sm transition-all hover:bg-white/20 hover:border-white/50">
+                <m.div variants={textVariants} className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                  <Button asChild size="lg" className="w-full sm:w-auto h-12 md:h-14 rounded-full bg-white px-8 text-base font-semibold text-black transition-all hover:bg-stone-200 hover:scale-105 active:scale-95">
                     <Link href="/shop">
-                      View Gallery
+                      Shop Collection
                     </Link>
                   </Button>
                 </m.div>

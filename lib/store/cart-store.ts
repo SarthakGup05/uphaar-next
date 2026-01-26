@@ -1,6 +1,6 @@
 // store/cart-store.ts
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
 export interface CartItem {
   id: string;
@@ -12,9 +12,9 @@ export interface CartItem {
 }
 
 interface CouponState {
-    code: string;
-    discountAmount: number;
-    discountType: "PERCENTAGE" | "FIXED";
+  code: string;
+  discountAmount: number;
+  discountType: "PERCENTAGE" | "FIXED";
 }
 
 interface CartStore {
@@ -28,6 +28,7 @@ interface CartStore {
   clearCart: () => void;
   total: () => number;
   subtotal: () => number;
+  shipping: () => number;
   totalItems: () => number;
 }
 
@@ -36,53 +37,77 @@ export const useCartStore = create<CartStore>()(
     (set, get) => ({
       items: [],
       coupon: null,
-      
-      addItem: (newItem) => set((state) => {
-        const existing = state.items.find((item) => item.id === newItem.id);
-        if (existing) {
-          return {
-            items: state.items.map((item) =>
-              item.id === newItem.id
-                ? { ...item, quantity: item.quantity + newItem.quantity }
-                : item
-            ),
-          };
-        }
-        return { items: [...state.items, newItem] };
-      }),
 
-      removeItem: (id) => set((state) => ({
-        items: state.items.filter((item) => item.id !== id),
-      })),
-
-      updateQuantity: (id, delta) => set((state) => ({
-        items: state.items.map((item) => {
-          if (item.id === id) {
-            const newQty = Math.max(1, item.quantity + delta);
-            return { ...item, quantity: newQty };
+      addItem: (newItem) =>
+        set((state) => {
+          const existing = state.items.find((item) => item.id === newItem.id);
+          if (existing) {
+            return {
+              items: state.items.map((item) =>
+                item.id === newItem.id
+                  ? { ...item, quantity: item.quantity + newItem.quantity }
+                  : item,
+              ),
+            };
           }
-          return item;
+          return { items: [...state.items, newItem] };
         }),
-      })),
+
+      removeItem: (id) =>
+        set((state) => ({
+          items: state.items.filter((item) => item.id !== id),
+        })),
+
+      updateQuantity: (id, delta) =>
+        set((state) => ({
+          items: state.items.map((item) => {
+            if (item.id === id) {
+              const newQty = Math.max(1, item.quantity + delta);
+              return { ...item, quantity: newQty };
+            }
+            return item;
+          }),
+        })),
 
       clearCart: () => set({ items: [], coupon: null }),
 
       applyCoupon: (coupon) => set({ coupon }),
       removeCoupon: () => set({ coupon: null }),
 
-      subtotal: () => get().items.reduce((acc, item) => acc + item.price * item.quantity, 0),
+      subtotal: () =>
+        get().items.reduce((acc, item) => acc + item.price * item.quantity, 0),
+
+      shipping: () => {
+        const sub = get().items.reduce(
+          (acc, item) => acc + item.price * item.quantity,
+          0,
+        );
+        return sub > 0 && sub < 1999 ? 71 : 0;
+      },
 
       total: () => {
-          const state = get();
-          const sub = state.items.reduce((acc, item) => acc + item.price * item.quantity, 0);
-          if (state.coupon) {
-              return Math.max(0, sub - state.coupon.discountAmount);
-          }
-          return sub;
+        const state = get();
+        const sub = state.items.reduce(
+          (acc, item) => acc + item.price * item.quantity,
+          0,
+        );
+        let total = sub;
+
+        if (state.coupon) {
+          total = Math.max(0, total - state.coupon.discountAmount);
+        }
+
+        // Add shipping if cart is not empty and subtotal < 1999
+        if (sub > 0 && sub < 1999) {
+          total += 71;
+        }
+
+        return total;
       },
-      
-      totalItems: () => get().items.reduce((acc, item) => acc + item.quantity, 0),
+
+      totalItems: () =>
+        get().items.reduce((acc, item) => acc + item.quantity, 0),
     }),
-    { name: 'uphar-cart' } // Persist cart to localStorage so it survives refresh
-  )
+    { name: "uphar-cart" }, // Persist cart to localStorage so it survives refresh
+  ),
 );
