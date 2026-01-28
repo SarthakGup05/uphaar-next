@@ -8,10 +8,9 @@ import {
     Plus,
     ShoppingBag,
     Star,
+    StarHalf,
     Share2,
-    Heart,
     ArrowLeft,
-    Clock,
     ShieldCheck,
     Truck,
     RotateCcw,
@@ -24,7 +23,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import confetti from "canvas-confetti";
-import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogClose } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -40,6 +39,7 @@ import { cn } from "@/lib/utils";
 import imageKitLoader from "@/lib/imagekit-loader";
 import { toast } from "sonner";
 
+// --- Types ---
 interface Product {
     id: number;
     title: string;
@@ -57,6 +57,18 @@ interface ProductDetailsProps {
     product: Product;
 }
 
+// --- Helper: Confetti Animation ---
+const triggerConfetti = () => {
+    const end = Date.now() + 1000;
+    const colors = ['#a786df', '#fd86a9', '#fdb68c', '#ebf875'];
+
+    (function frame() {
+        confetti({ particleCount: 2, angle: 60, spread: 55, origin: { x: 0 }, colors });
+        confetti({ particleCount: 2, angle: 120, spread: 55, origin: { x: 1 }, colors });
+        if (Date.now() < end) requestAnimationFrame(frame);
+    }());
+};
+
 export default function ProductDetails({ product }: ProductDetailsProps) {
     const [activeImage, setActiveImage] = useState(0);
     const [isLightboxOpen, setIsLightboxOpen] = useState(false);
@@ -66,11 +78,14 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
     const { items, addItem, updateQuantity, removeItem } = useCartStore();
     const { data: coupons } = useActiveCoupons();
 
+    // Calculate Final Price
     const finalPrice = appliedDiscount
         ? appliedDiscount.type === "PERCENTAGE"
             ? product.price - (product.price * appliedDiscount.value / 100)
             : Math.max(0, product.price - appliedDiscount.value)
         : product.price;
+
+    // --- Handlers ---
 
     const handleApplyLocal = (code: string, value: number, type: "PERCENTAGE" | "FIXED") => {
         if (appliedDiscount?.code === code) {
@@ -79,18 +94,18 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
         }
         setAppliedDiscount({ code, value, type });
         toast.success(`Coupon ${code} applied!`);
-
-        // Trigger confetti for excitement
-        const end = Date.now() + 1000;
-        const colors = ['#a786df', '#fd86a9', '#fdb68c', '#ebf875'];
-        (function frame() {
-            confetti({ particleCount: 2, angle: 60, spread: 55, origin: { x: 0 }, colors });
-            confetti({ particleCount: 2, angle: 120, spread: 55, origin: { x: 1 }, colors });
-            if (Date.now() < end) requestAnimationFrame(frame);
-        }());
+        triggerConfetti();
     };
 
-    // Check if item is in cart
+    const handleCopyCoupon = (code: string) => {
+        navigator.clipboard.writeText(code);
+        setCopiedCoupon(code);
+        toast.success("Coupon code copied!");
+        triggerConfetti();
+        setTimeout(() => setCopiedCoupon(null), 2000);
+    };
+
+    // Cart Logic
     const cartItem = items.find(item => item.id === product.id.toString());
     const cartQty = cartItem ? cartItem.quantity : 0;
 
@@ -100,12 +115,11 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
         ) || [];
     }, [coupons, product.id]);
 
-    // Blinkit-style Add Logic
     const handleAdd = () => {
         addItem({
             id: product.id.toString(),
             title: product.title,
-            price: product.price,
+            price: product.price, 
             image: product.images[0],
             quantity: 1,
             slug: product.slug,
@@ -146,42 +160,28 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
         }
     };
 
-    const handleCopyCoupon = (code: string) => {
-        navigator.clipboard.writeText(code);
-        setCopiedCoupon(code);
-        toast.success("Coupon code copied!");
+    // Helper to render stars
+    const renderStars = (rating: number) => {
+        const fullStars = Math.floor(rating);
+        const hasHalfStar = rating % 1 >= 0.5;
 
-        // Trigger confetti
-        const end = Date.now() + 1000;
-        const colors = ['#a786df', '#fd86a9', '#fdb68c', '#ebf875'];
-
-        (function frame() {
-            confetti({
-                particleCount: 2,
-                angle: 60,
-                spread: 55,
-                origin: { x: 0 },
-                colors: colors
-            });
-            confetti({
-                particleCount: 2,
-                angle: 120,
-                spread: 55,
-                origin: { x: 1 },
-                colors: colors
-            });
-
-            if (Date.now() < end) {
-                requestAnimationFrame(frame);
-            }
-        }());
-
-        setTimeout(() => setCopiedCoupon(null), 2000);
+        return (
+            <div className="flex items-center gap-1">
+                {[...Array(5)].map((_, i) => {
+                    if (i < fullStars) {
+                        return <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />;
+                    }
+                    if (i === fullStars && hasHalfStar) {
+                        return <StarHalf key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />;
+                    }
+                    return <Star key={i} className="w-4 h-4 text-stone-200 fill-stone-100" />;
+                })}
+            </div>
+        );
     };
 
     return (
         <div className="min-h-screen bg-stone-50/30 text-stone-950 pb-24 md:pb-20">
-            {/* Breadcrumb Header */}
             {/* Breadcrumb Header */}
             <div className="container mx-auto px-4 py-4">
                 <div className="flex items-center text-sm text-stone-500 overflow-hidden">
@@ -248,6 +248,7 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
                                     <button
                                         key={idx}
                                         onClick={() => setActiveImage(idx)}
+                                        aria-label={`View image ${idx + 1}`}
                                         className={cn(
                                             "relative h-20 w-20 shrink-0 overflow-hidden rounded-xl border-2 transition-all",
                                             activeImage === idx
@@ -257,7 +258,7 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
                                     >
                                         <Image
                                             src={img}
-                                            alt={`View ${idx + 1}`}
+                                            alt={`Thumbnail ${idx + 1}`}
                                             fill
                                             loader={imageKitLoader}
                                             className="object-cover"
@@ -285,7 +286,7 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
                                 <div className="h-10 w-10 rounded-full bg-amber-50 flex items-center justify-center text-amber-600">
                                     <Truck className="h-5 w-5" />
                                 </div>
-                                <span className="text-xs font-semibold text-stone-600">Safe Delivery</span>
+                                <span className="text-xs font-semibold text-stone-600">Shipping ₹71</span>
                             </div>
                         </div>
                     </div>
@@ -300,18 +301,25 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
                                     <h1 className="text-2xl md:text-3xl font-bold font-serif text-stone-900 leading-tight">
                                         {product.title}
                                     </h1>
-                                    <p className="text-sm text-stone-500 font-medium">1 Unit</p>
+                                    
+                                    {/* --- UPDATED RATING SECTION (Stars Only) --- */}
+                                    <div className="flex items-center gap-2 pb-1">
+                                        {renderStars(product.rating)}
+                                    </div>
+                                    {/* ------------------------------------------- */}
+
+                                    <p className="text-sm text-stone-500 font-medium pt-1">1 Unit</p>
                                 </div>
                                 <div className="flex gap-1 shrink-0">
                                     <Button
                                         variant="ghost"
                                         size="icon"
+                                        aria-label="Share product"
                                         className="h-10 w-10 text-stone-400 hover:text-stone-900 hover:bg-stone-100 rounded-full"
                                         onClick={handleShare}
                                     >
                                         <Share2 className="h-5 w-5" />
                                     </Button>
-
                                 </div>
                             </div>
 
@@ -367,6 +375,7 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
                                         <div className="flex items-center justify-between h-10 w-full rounded-md bg-green-700 text-white font-bold px-2 shadow-sm">
                                             <button
                                                 onClick={handleDecrement}
+                                                aria-label="Decrease quantity"
                                                 className="p-1 hover:bg-green-800 rounded transition"
                                             >
                                                 <Minus className="h-4 w-4" />
@@ -374,6 +383,7 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
                                             <span>{cartQty}</span>
                                             <button
                                                 onClick={handleIncrement}
+                                                aria-label="Increase quantity"
                                                 className="p-1 hover:bg-green-800 rounded transition"
                                             >
                                                 <Plus className="h-4 w-4" />
@@ -425,6 +435,7 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
                                                     whileHover={{ scale: 1.05 }}
                                                     whileTap={{ scale: 0.95 }}
                                                     onClick={() => handleCopyCoupon(coupon.code)}
+                                                    aria-label="Copy coupon code"
                                                     className="h-8 w-8 flex items-center justify-center bg-white border border-stone-200 rounded-md text-stone-500 hover:text-blue-600 hover:border-blue-200 transition-colors"
                                                     title="Copy Code"
                                                 >
@@ -441,13 +452,10 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
                             </div>
                         )}
 
-
-
                         {/* Product Info Section */}
                         <div className="bg-white p-5 rounded-2xl border border-stone-100 shadow-sm space-y-4">
                             <h3 className="font-bold text-stone-900 text-sm uppercase tracking-wide">Product Details</h3>
 
-                            {/* Key Features / Schema Data */}
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="p-3 bg-stone-50 rounded-lg">
                                     <span className="text-xs text-stone-500 uppercase tracking-wider font-semibold">Category</span>
@@ -474,7 +482,6 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
                                 </AccordionItem>
                             </Accordion>
                         </div>
-
                     </div>
                 </div>
             </div>
@@ -489,31 +496,33 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
                         className="w-full h-12 bg-green-700 hover:bg-green-800 text-white font-bold rounded-xl shadow-sm"
                     >
                         <ShoppingBag className="mr-2 h-5 w-5" />
-                        {product.stock === 0 ? "Out of Stock" : `ADD FOR ₹${product.price}`}
+                        {product.stock === 0 ? "Out of Stock" : `ADD FOR ₹${finalPrice.toLocaleString()}`}
                     </Button>
                 ) : (
                     <div className="flex items-center justify-between gap-4">
                         <div className="flex items-center justify-between h-12 w-32 rounded-xl bg-stone-100 px-2 font-bold text-stone-900">
-                            <button onClick={handleDecrement} className="p-2 bg-white rounded-lg shadow-sm"><Minus className="h-4 w-4" /></button>
+                            <button onClick={handleDecrement} aria-label="Decrease quantity" className="p-2 bg-white rounded-lg shadow-sm"><Minus className="h-4 w-4" /></button>
                             <span>{cartQty}</span>
-                            <button onClick={handleIncrement} className="p-2 bg-white rounded-lg shadow-sm"><Plus className="h-4 w-4" /></button>
+                            <button onClick={handleIncrement} aria-label="Increase quantity" className="p-2 bg-white rounded-lg shadow-sm"><Plus className="h-4 w-4" /></button>
                         </div>
                         <Link href="/cart" className="flex-1">
                             <Button className="w-full h-12 bg-green-700 hover:bg-green-800 text-white font-bold rounded-xl">
-                                View Cart <span className="ml-2 bg-green-900/40 px-2 py-0.5 rounded text-xs">₹{(product.price * cartQty).toLocaleString()}</span>
+                                View Cart <span className="ml-2 bg-green-900/40 px-2 py-0.5 rounded text-xs">₹{(finalPrice * cartQty).toLocaleString()}</span>
                             </Button>
                         </Link>
                     </div>
                 )}
             </div>
+
             {/* Lightbox Dialog */}
             <Dialog open={isLightboxOpen} onOpenChange={setIsLightboxOpen}>
                 <DialogContent className="max-w-[95vw] max-h-[95vh] w-full h-full md:w-auto md:h-auto md:aspect-square p-0 bg-transparent border-none shadow-none flex items-center justify-center overflow-hidden focus:outline-none">
                     <div className="relative w-full h-full md:w-[80vh] md:h-[80vh] bg-transparent">
                         <DialogTitle className="sr-only">{product.title} Image View</DialogTitle>
-                        {/* Close Button styling tweak if needed, or rely on DialogContent's default close */}
+                        
                         <button
                             onClick={() => setIsLightboxOpen(false)}
+                            aria-label="Close lightbox"
                             className="absolute top-4 right-4 z-50 p-2 bg-black/50 hover:bg-black/70 text-white rounded-full backdrop-blur-sm transition-colors"
                         >
                             <X className="h-6 w-6" />
@@ -527,6 +536,7 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
                                         e.stopPropagation();
                                         setActiveImage((prev) => (prev === 0 ? product.images.length - 1 : prev - 1));
                                     }}
+                                    aria-label="Previous image"
                                     className="absolute left-4 top-1/2 -translate-y-1/2 z-50 p-3 bg-black/50 hover:bg-black/70 text-white rounded-full backdrop-blur-sm transition-colors"
                                 >
                                     <ChevronLeft className="h-6 w-6" />
@@ -534,8 +544,10 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
                                 <button
                                     onClick={(e) => {
                                         e.stopPropagation();
+                                        // SYNTAX FIXED: Used '?' instead of ':' for ternary operator
                                         setActiveImage((prev) => (prev === product.images.length - 1 ? 0 : prev + 1));
                                     }}
+                                    aria-label="Next image"
                                     className="absolute right-4 top-1/2 -translate-y-1/2 z-50 p-3 bg-black/50 hover:bg-black/70 text-white rounded-full backdrop-blur-sm transition-colors"
                                 >
                                     <ChevronRight className="h-6 w-6" />

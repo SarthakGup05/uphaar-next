@@ -79,8 +79,7 @@ export default function Footer() {
         <div className="flex flex-col items-center justify-between gap-4 text-xs text-muted-foreground md:flex-row">
           <p>© {new Date().getFullYear()} Uphaar by Niharika. All rights reserved.</p>
           <div className="flex gap-6">
-            <Link href="/privacy" className="hover:text-primary">Privacy Policy</Link>
-            <Link href="/terms" className="hover:text-primary">Terms of Service</Link>
+            <Link href="/policies" className="hover:text-primary">Terms & Policies</Link>
           </div>
         </div>
       </div>
