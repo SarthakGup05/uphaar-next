@@ -15,8 +15,10 @@ import {
     ChevronRight,
     Search,
     Images,
-    TicketPercent
+    TicketPercent,
+    LogOut
 } from "lucide-react";
+import { logoutAction } from "@/app/(admin)/admin/actions";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
@@ -58,6 +60,12 @@ export function AdminSidebar({ className }: SidebarProps) {
             href: "/admin/coupons",
             active: pathname.startsWith("/admin/coupons"),
         },
+        {
+            label: "Workshops",
+            icon: Users, // Recycling Users icon or we can import Calendar if preferred, but sticking to existing imports for simplicity unless Calendar is available
+            href: "/admin/workshops",
+            active: pathname.startsWith("/admin/workshops"),
+        },
 
     ];
 
@@ -94,7 +102,7 @@ export function AdminSidebar({ className }: SidebarProps) {
             {/* Desktop Sidebar */}
             <div
                 className={cn(
-                    "hidden border-r bg-muted/40 md:block transition-all duration-300",
+                    "hidden border-r bg-muted/40 md:block transition-all duration-300 sticky top-0 h-screen",
                     collapsed ? "w-[80px]" : "w-64",
                     className
                 )}
@@ -112,6 +120,19 @@ export function AdminSidebar({ className }: SidebarProps) {
                     <ScrollArea className="flex-1">
                         <SidebarContent />
                     </ScrollArea>
+                    <div className="p-2 border-t mt-auto">
+                        <Button
+                            variant="ghost"
+                            className={cn(
+                                "w-full justify-start text-red-500 hover:text-red-600 hover:bg-red-50",
+                                collapsed ? "justify-center px-2" : "px-4"
+                            )}
+                            onClick={() => logoutAction()}
+                        >
+                            <LogOut className={cn("h-4 w-4", !collapsed && "mr-2")} />
+                            {!collapsed && "Logout"}
+                        </Button>
+                    </div>
                 </div>
             </div>
 
@@ -127,7 +148,7 @@ export function AdminSidebar({ className }: SidebarProps) {
                         <span className="sr-only">Toggle navigation menu</span>
                     </Button>
                 </SheetTrigger>
-                <SheetContent side="left" className="flex flex-col">
+                <SheetContent side="left" className="flex flex-col h-full">
                     <nav className="grid gap-2 text-lg font-medium">
                         <Link
                             href="#"
@@ -150,6 +171,17 @@ export function AdminSidebar({ className }: SidebarProps) {
                             </Link>
                         ))}
                     </nav>
+                    <div className="mt-auto pb-4">
+                        <button
+                            onClick={() => logoutAction()}
+                            className={cn(
+                                "w-full flex items-center gap-4 rounded-xl px-3 py-2 hover:bg-red-50 text-red-500 hover:text-red-600 font-medium",
+                            )}
+                        >
+                            <LogOut className="h-5 w-5" />
+                            Logout
+                        </button>
+                    </div>
                 </SheetContent>
             </Sheet>
         </>

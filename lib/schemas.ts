@@ -49,3 +49,30 @@ export const heroSlideSchema = z.object({
 
 export type ProductFormValues = z.infer<typeof productSchema>;
 export type HeroSlideFormValues = z.infer<typeof heroSlideSchema>;
+
+export const workshopSchema = z.object({
+  title: z
+    .string()
+    .min(5, { message: "Title must be at least 5 characters long" })
+    .max(100, { message: "Title cannot exceed 100 characters" }),
+  slug: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, {
+    message: "Slug must be lowercase alphanumeric with hyphens",
+  }),
+  description: z
+    .string()
+    .min(50, { message: "Description must be at least 50 characters long" }),
+  date: z.coerce.date(),
+  location: z.string().min(1, { message: "Location is required" }),
+  price: z.coerce
+    .number()
+    .nonnegative({ message: "Price must be a non-negative number" }),
+  totalSeats: z.coerce
+    .number()
+    .int()
+    .positive({ message: "Total seats must be a positive integer" }),
+  image: z.string().url({ message: "Main image is required" }),
+  images: z.array(z.string().url()).optional(),
+  instructor: z.string().optional(),
+});
+
+export type WorkshopFormValues = z.infer<typeof workshopSchema>;

@@ -1,13 +1,27 @@
-export default function imageKitLoader({ src, width, quality }: { src: string; width: number; quality?: number }) {
+"use client";
+
+export default function imageKitLoader({
+  src,
+  width,
+  quality,
+}: {
+  src: string;
+  width: number;
+  quality?: number;
+}) {
   if (src[0] === "/") src = src.slice(1);
   const params = [`w-${width}`];
   // Default quality to 80 if not specified to save bandwidth
   params.push(`q-${quality || 80}`);
   const paramsString = params.join(",");
-  const urlEndpoint = process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT || "https://ik.imagekit.io/uphaar"; 
+  const urlEndpoint =
+    process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT ||
+    "https://ik.imagekit.io/uphaar";
 
   // Clean the endpoint to ensure no trailing slash
-  const cleanEndpoint = urlEndpoint.endsWith("/") ? urlEndpoint.slice(0, -1) : urlEndpoint;
+  const cleanEndpoint = urlEndpoint.endsWith("/")
+    ? urlEndpoint.slice(0, -1)
+    : urlEndpoint;
 
   // Check if the image source is hosted on ImageKit
   if (src.startsWith(cleanEndpoint)) {

@@ -8,18 +8,12 @@ export async function getDashboardStats() {
   const [revenueResult] = await db
     .select({ total: sum(orders.totalAmount) })
     .from(orders);
-  
-  const [ordersResult] = await db
-    .select({ count: count() })
-    .from(orders);
 
-  const [productsResult] = await db
-    .select({ count: count() })
-    .from(products);
+  const [ordersResult] = await db.select({ count: count() }).from(orders);
 
-  const [usersResult] = await db
-    .select({ count: count() })
-    .from(users);
+  const [productsResult] = await db.select({ count: count() }).from(products);
+
+  const [usersResult] = await db.select({ count: count() }).from(users);
 
   const totalRevenue = Number(revenueResult?.total) || 0;
   const totalOrders = ordersResult?.count || 0;
@@ -56,7 +50,9 @@ export async function getRevenueChartData() {
     })
     .from(orders)
     .where(sql`${orders.createdAt} >= ${sixMonthsAgo}`)
-    .groupBy(sql`TO_CHAR(${orders.createdAt}, 'Mon'), DATE_TRUNC('month', ${orders.createdAt})`)
+    .groupBy(
+      sql`TO_CHAR(${orders.createdAt}, 'Mon'), DATE_TRUNC('month', ${orders.createdAt})`,
+    )
     .orderBy(sql`DATE_TRUNC('month', ${orders.createdAt}) ASC`);
 
   return result.map((row) => ({
@@ -65,3 +61,10 @@ export async function getRevenueChartData() {
   }));
 }
 
+import { logout } from "@/lib/auth";
+import { redirect } from "next/navigation";
+
+export async function logoutAction() {
+  await logout();
+  redirect("/admin/login");
+}

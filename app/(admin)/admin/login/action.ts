@@ -29,7 +29,12 @@ export async function loginAction(prevState: any, formData: FormData) {
   }
 
   // 3. Create Session & Redirect
-  await login({ id: user.id, email: user.email, name: user.name });
-  
+  await login({
+    id: user.id,
+    email: user.email,
+    name: user.name,
+    role: user.role,
+  });
+
   redirect("/admin");
 }

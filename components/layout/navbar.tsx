@@ -16,6 +16,7 @@ const SHOP_CATEGORIES = [
   { name: "Scented Candles", href: "/shop?category=candles" },
   { name: "Concrete Décor", href: "/shop?category=concrete" },
   { name: "Gift Hampers", href: "/shop?category=gifts" },
+  { name: "Workshops", href: "/workshops" },
   { name: "Shop All", href: "/shop" },
 ];
 

@@ -108,3 +108,23 @@ export const couponProducts = pgTable("coupon_products", {
     .notNull()
     .references(() => products.id, { onDelete: "cascade" }),
 });
+
+// ----------------------------------------------------------------------
+// 5. WORKSHOPS
+// ----------------------------------------------------------------------
+
+export const workshops = pgTable("workshops", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  slug: text("slug").notNull().unique(),
+  description: text("description").notNull(),
+  date: timestamp("date").notNull(),
+  location: text("location").notNull(),
+  price: numeric("price", { precision: 10, scale: 2 }).notNull(),
+  totalSeats: integer("total_seats").notNull(),
+  seatsFilled: integer("seats_filled").notNull().default(0),
+  image: text("image").notNull(),
+  images: text("images").array(),
+  instructor: text("instructor"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
