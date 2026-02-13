@@ -68,7 +68,7 @@ export default function Footer() {
             <h3 className="font-serif text-lg font-medium text-foreground">Contact</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li><span className="block text-foreground font-medium">Email</span> Uphaarbyniharika@gmail.com</li>
-              <li><span className="block text-foreground font-medium">Phone</span> +91 70007 69656</li>
+              <li><span className="block text-foreground font-medium">Phone</span>+919756655122</li>
             </ul>
           </div>
         </div>

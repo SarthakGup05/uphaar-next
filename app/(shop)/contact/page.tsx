@@ -120,7 +120,7 @@ export default function ContactPage() {
                     className="h-auto p-0 text-primary underline decoration-primary/30 underline-offset-4 hover:decoration-primary"
                     onClick={handleWhatsAppClick}
                   >
-                    +91 70007 69656
+                    +91 97566 55122
                   </Button>
                 </div>
               </div>

@@ -12,7 +12,7 @@ interface AddToCartButtonProps {
         id: number;
         title: string;
         slug: string;
-        price: number;
+        price: number | string;
         image: string;
     };
     isSoldOut: boolean;

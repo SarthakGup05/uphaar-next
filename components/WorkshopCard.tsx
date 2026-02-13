@@ -16,7 +16,7 @@ interface WorkshopProps {
     description: string;
     date: Date | string;
     location: string;
-    price: number;
+    price: number | string;
     totalSeats: number;
     seatsFilled: number;
     image: string;
@@ -35,6 +35,7 @@ export default function WorkshopCard({
     const workshopDate = new Date(date);
     const seatsLeft = totalSeats - seatsFilled;
     const isSoldOut = seatsLeft <= 0;
+    const numericPrice = Number(price);
 
     return (
         <Link href={`/workshops/${slug}`} className="group block h-full w-full">
@@ -93,7 +94,7 @@ export default function WorkshopCard({
                         <div>
                             <p className="text-xs text-stone-500">Price per person</p>
                             <p className="text-lg font-bold text-stone-900">
-                                ₹{price.toLocaleString()}
+                                ₹{numericPrice.toLocaleString()}
                             </p>
                         </div>
 
